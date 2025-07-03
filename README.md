@@ -225,9 +225,8 @@ flutter run
 ## 🔐 System Architecture
 
 The application implements a robust admin-focused architecture:
-- **Authentication**: Secure admin login with token-based session management
+- **Authentication**: admin login with session management
 - **Authorization**: Admin-only access to all platform data and operations
-- **Data Security**: Protected access to sensitive customer and business information
 - **Session Management**: Automatic session handling with secure logout functionality
 
 ## 🤝 Contributing
