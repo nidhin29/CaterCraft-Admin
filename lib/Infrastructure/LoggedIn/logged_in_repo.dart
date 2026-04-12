@@ -8,10 +8,12 @@ class LoggedInRepo implements LoggedInService {
   Future<bool> isLoggedIn() async {
     final sharedPref = await SharedPreferences.getInstance();
     final email = sharedPref.getString('email');
-    if (email == null) {
-      return false;
-    } else {
-      return true;
-    }
+    return email != null;
+  }
+
+  @override
+  Future<bool> isOnboarded() async {
+    final sharedPref = await SharedPreferences.getInstance();
+    return sharedPref.getBool('is_onboarded') ?? false;
   }
 }

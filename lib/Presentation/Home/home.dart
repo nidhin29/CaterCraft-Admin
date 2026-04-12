@@ -1,11 +1,5 @@
-import 'package:catering/Application/loggedin/loggedin_cubit.dart';
 import 'package:catering/Presentation/Auth/signin.dart';
-import 'package:catering/Presentation/Home/Bookings/booking.dart';
-import 'package:catering/Presentation/Home/Customers/customers.dart';
-import 'package:catering/Presentation/Home/Feedback/feedback.dart';
-import 'package:catering/Presentation/Home/Teams/team.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -81,9 +75,7 @@ class HomePage extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                BlocProvider.of<LoggedinCubit>(
-                                  context,
-                                ).deleteEmail();
+                              
                                 Navigator.of(context).pushReplacement(
                                   MaterialPageRoute(
                                     builder: (context) => LoginPage(),
@@ -136,34 +128,6 @@ class HomePage extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   // Handle navigation based on item tapped
-                  switch (item['label']) {
-                    case 'Bookings':
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const BookingPage(),
-                        ),
-                      );
-                      break;
-                    case 'Team':
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const TeamViewPage(),
-                        ),
-                      );
-                      break;
-                    case 'Customers':
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const CustomersPage(),
-                        ),
-                      );
-                      break;
-                    case 'Feedback':
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => FeedbackPage()),
-                      );
-                      break;
-                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(

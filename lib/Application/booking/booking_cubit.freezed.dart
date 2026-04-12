@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BookingState {
 
- bool get isLoading; Option<Either<MainFailure, BookingModel>> get isFailureOrSuccess;
+ bool get isLoading; Option<Either<MainFailure, List<BookingModel>>> get isFailureOrSuccess;
 /// Create a copy of BookingState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -46,7 +46,7 @@ abstract mixin class $BookingStateCopyWith<$Res>  {
   factory $BookingStateCopyWith(BookingState value, $Res Function(BookingState) _then) = _$BookingStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, Option<Either<MainFailure, BookingModel>> isFailureOrSuccess
+ bool isLoading, Option<Either<MainFailure, List<BookingModel>>> isFailureOrSuccess
 });
 
 
@@ -67,7 +67,7 @@ class _$BookingStateCopyWithImpl<$Res>
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isFailureOrSuccess: null == isFailureOrSuccess ? _self.isFailureOrSuccess : isFailureOrSuccess // ignore: cast_nullable_to_non_nullable
-as Option<Either<MainFailure, BookingModel>>,
+as Option<Either<MainFailure, List<BookingModel>>>,
   ));
 }
 
@@ -82,7 +82,7 @@ class _Initial implements BookingState {
   
 
 @override final  bool isLoading;
-@override final  Option<Either<MainFailure, BookingModel>> isFailureOrSuccess;
+@override final  Option<Either<MainFailure, List<BookingModel>>> isFailureOrSuccess;
 
 /// Create a copy of BookingState
 /// with the given fields replaced by the non-null parameter values.
@@ -114,7 +114,7 @@ abstract mixin class _$InitialCopyWith<$Res> implements $BookingStateCopyWith<$R
   factory _$InitialCopyWith(_Initial value, $Res Function(_Initial) _then) = __$InitialCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, Option<Either<MainFailure, BookingModel>> isFailureOrSuccess
+ bool isLoading, Option<Either<MainFailure, List<BookingModel>>> isFailureOrSuccess
 });
 
 
@@ -135,7 +135,7 @@ class __$InitialCopyWithImpl<$Res>
   return _then(_Initial(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isFailureOrSuccess: null == isFailureOrSuccess ? _self.isFailureOrSuccess : isFailureOrSuccess // ignore: cast_nullable_to_non_nullable
-as Option<Either<MainFailure, BookingModel>>,
+as Option<Either<MainFailure, List<BookingModel>>>,
   ));
 }
 

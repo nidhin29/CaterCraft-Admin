@@ -1,21 +1,19 @@
-import 'booking.dart';
+import 'package:catering/Domain/Service/service_model.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class BookingModel {
-  String? status;
-  List<Booking>? bookings;
+part 'booking_model.freezed.dart';
+part 'booking_model.g.dart';
 
-  BookingModel({this.status, this.bookings});
+@freezed
+abstract class BookingModel with _$BookingModel {
+  const factory BookingModel({
+    @JsonKey(name: 'id') String? id,
+    @JsonKey(name: 'service') required ServiceModel service,
+    @JsonKey(name: 'customer_email') required String customerEmail,
+    @JsonKey(name: 'datetime') required String dateTime,
+    @JsonKey(name: 'status') required String status,
+    @JsonKey(name: 'razorpay_order_id') String? razorpayOrderId,
+  }) = _BookingModel;
 
-  factory BookingModel.fromJson(Map<String, dynamic> json) => BookingModel(
-    status: json['status'] as String?,
-    bookings:
-        (json['bookings'] as List<dynamic>?)
-            ?.map((e) => Booking.fromJson(e as Map<String, dynamic>))
-            .toList(),
-  );
-
-  Map<String, dynamic> toJson() => {
-    'status': status,
-    'bookings': bookings?.map((e) => e.toJson()).toList(),
-  };
+  factory BookingModel.fromJson(Map<String, dynamic> json) => _$BookingModelFromJson(json);
 }

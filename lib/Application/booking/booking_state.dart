@@ -4,10 +4,9 @@ part of 'booking_cubit.dart';
 abstract class BookingState with _$BookingState {
   const factory BookingState({
     required bool isLoading,
-    required Option<Either<MainFailure, BookingModel>> isFailureOrSuccess,
+    required Option<Either<MainFailure, List<BookingModel>>> isFailureOrSuccess,
   }) = _Initial;
 
   factory BookingState.initial() =>
-      BookingState(isLoading: false, isFailureOrSuccess: none(),
-        );
+      BookingState(isLoading: false, isFailureOrSuccess: none());
 }

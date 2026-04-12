@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LoggedinState {
 
- bool get value;
+ bool get value; bool get isOnboarded; int? get role;
 /// Create a copy of LoggedinState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $LoggedinStateCopyWith<LoggedinState> get copyWith => _$LoggedinStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoggedinState&&(identical(other.value, value) || other.value == value));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoggedinState&&(identical(other.value, value) || other.value == value)&&(identical(other.isOnboarded, isOnboarded) || other.isOnboarded == isOnboarded)&&(identical(other.role, role) || other.role == role));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,value);
+int get hashCode => Object.hash(runtimeType,value,isOnboarded,role);
 
 @override
 String toString() {
-  return 'LoggedinState(value: $value)';
+  return 'LoggedinState(value: $value, isOnboarded: $isOnboarded, role: $role)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $LoggedinStateCopyWith<$Res>  {
   factory $LoggedinStateCopyWith(LoggedinState value, $Res Function(LoggedinState) _then) = _$LoggedinStateCopyWithImpl;
 @useResult
 $Res call({
- bool value
+ bool value, bool isOnboarded, int? role
 });
 
 
@@ -63,10 +63,12 @@ class _$LoggedinStateCopyWithImpl<$Res>
 
 /// Create a copy of LoggedinState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? value = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? value = null,Object? isOnboarded = null,Object? role = freezed,}) {
   return _then(_self.copyWith(
 value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,isOnboarded: null == isOnboarded ? _self.isOnboarded : isOnboarded // ignore: cast_nullable_to_non_nullable
+as bool,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -77,10 +79,12 @@ as bool,
 
 
 class _Initial implements LoggedinState {
-  const _Initial({required this.value});
+  const _Initial({required this.value, required this.isOnboarded, this.role});
   
 
 @override final  bool value;
+@override final  bool isOnboarded;
+@override final  int? role;
 
 /// Create a copy of LoggedinState
 /// with the given fields replaced by the non-null parameter values.
@@ -92,16 +96,16 @@ _$InitialCopyWith<_Initial> get copyWith => __$InitialCopyWithImpl<_Initial>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial&&(identical(other.value, value) || other.value == value));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Initial&&(identical(other.value, value) || other.value == value)&&(identical(other.isOnboarded, isOnboarded) || other.isOnboarded == isOnboarded)&&(identical(other.role, role) || other.role == role));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,value);
+int get hashCode => Object.hash(runtimeType,value,isOnboarded,role);
 
 @override
 String toString() {
-  return 'LoggedinState(value: $value)';
+  return 'LoggedinState(value: $value, isOnboarded: $isOnboarded, role: $role)';
 }
 
 
@@ -112,7 +116,7 @@ abstract mixin class _$InitialCopyWith<$Res> implements $LoggedinStateCopyWith<$
   factory _$InitialCopyWith(_Initial value, $Res Function(_Initial) _then) = __$InitialCopyWithImpl;
 @override @useResult
 $Res call({
- bool value
+ bool value, bool isOnboarded, int? role
 });
 
 
@@ -129,10 +133,12 @@ class __$InitialCopyWithImpl<$Res>
 
 /// Create a copy of LoggedinState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? value = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? value = null,Object? isOnboarded = null,Object? role = freezed,}) {
   return _then(_Initial(
 value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,isOnboarded: null == isOnboarded ? _self.isOnboarded : isOnboarded // ignore: cast_nullable_to_non_nullable
+as bool,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

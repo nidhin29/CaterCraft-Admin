@@ -1,7 +1,11 @@
+import 'package:catering/Presentation/common/theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:catering/Application/loggedin/loggedin_cubit.dart';
-import 'package:catering/Presentation/Home/home.dart';
+import 'package:catering/Presentation/Home/owner_dashboard.dart';
+import 'package:catering/Presentation/Home/staff_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:catering/Presentation/Auth/signin.dart';
+import 'package:catering/Presentation/Onboarding/onboarding.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -15,23 +19,23 @@ class SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
+          vsync: this,
+          duration: const Duration(seconds: 2),
     );
 
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-
     _controller.forward();
+    
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        context.read<LoggedinCubit>().checkSession();
+      }
+    });
   }
 
   @override
@@ -42,44 +46,76 @@ class SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BlocProvider.of<LoggedinCubit>(context).isLoggedIn();
-    });
     return Scaffold(
-      backgroundColor: Colors.blueAccent,
-      body: BlocConsumer<LoggedinCubit, LoggedinState>(
+      body: BlocListener<LoggedinCubit, LoggedinState>(
         listener: (context, state) {
           if (state.value) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => HomePage()),
-              (route) => false,
+            if (state.role == 1) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const OwnerDashboard()),
+              );
+            } else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const StaffDashboard()),
+              );
+            }
+          } else if (!state.isOnboarded) {
+             Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const OnboardingScreen()),
             );
           } else {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => LoginPage()),
-              (route) => false,
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const LoginPage()),
             );
           }
         },
-        builder: (context, state) {
-          return Center(
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: const Text(
-                  'FeastEase',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(gradient: AppTheme.premiumGradient),
+          child: Center(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: const Icon(
+                      Icons.restaurant_menu_rounded,
+                      size: 80,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'CATERCRAFT',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white,
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ELEVATED EVENTS',
+                    style: GoogleFonts.outfit(
+                      color: Colors.white38,
+                      fontSize: 12,
+                      letterSpacing: 4,
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }

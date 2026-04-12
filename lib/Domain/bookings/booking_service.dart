@@ -3,5 +3,5 @@ import 'package:dartz/dartz.dart';
 import 'package:catering/Domain/Failure/failure.dart';
 
 abstract class BookingService {
-  Future<Either<MainFailure, BookingModel>> getBookings();
+  Future<Either<MainFailure, List<BookingModel>>> getBookings();
 }

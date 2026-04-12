@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SigninState {
 
- bool get isLoading; Option<Either<MainFailure, SignInModel>> get isFailureOrSuccess;
+ bool get isLoading; Option<Either<MainFailure, AuthResponse>> get isFailureOrSuccess;
 /// Create a copy of SigninState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -46,7 +46,7 @@ abstract mixin class $SigninStateCopyWith<$Res>  {
   factory $SigninStateCopyWith(SigninState value, $Res Function(SigninState) _then) = _$SigninStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, Option<Either<MainFailure, SignInModel>> isFailureOrSuccess
+ bool isLoading, Option<Either<MainFailure, AuthResponse>> isFailureOrSuccess
 });
 
 
@@ -67,7 +67,7 @@ class _$SigninStateCopyWithImpl<$Res>
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isFailureOrSuccess: null == isFailureOrSuccess ? _self.isFailureOrSuccess : isFailureOrSuccess // ignore: cast_nullable_to_non_nullable
-as Option<Either<MainFailure, SignInModel>>,
+as Option<Either<MainFailure, AuthResponse>>,
   ));
 }
 
@@ -82,7 +82,7 @@ class _SigninState implements SigninState {
   
 
 @override final  bool isLoading;
-@override final  Option<Either<MainFailure, SignInModel>> isFailureOrSuccess;
+@override final  Option<Either<MainFailure, AuthResponse>> isFailureOrSuccess;
 
 /// Create a copy of SigninState
 /// with the given fields replaced by the non-null parameter values.
@@ -114,7 +114,7 @@ abstract mixin class _$SigninStateCopyWith<$Res> implements $SigninStateCopyWith
   factory _$SigninStateCopyWith(_SigninState value, $Res Function(_SigninState) _then) = __$SigninStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, Option<Either<MainFailure, SignInModel>> isFailureOrSuccess
+ bool isLoading, Option<Either<MainFailure, AuthResponse>> isFailureOrSuccess
 });
 
 
@@ -135,7 +135,7 @@ class __$SigninStateCopyWithImpl<$Res>
   return _then(_SigninState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isFailureOrSuccess: null == isFailureOrSuccess ? _self.isFailureOrSuccess : isFailureOrSuccess // ignore: cast_nullable_to_non_nullable
-as Option<Either<MainFailure, SignInModel>>,
+as Option<Either<MainFailure, AuthResponse>>,
   ));
 }
 

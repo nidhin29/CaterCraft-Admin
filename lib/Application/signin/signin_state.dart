@@ -4,7 +4,7 @@ part of 'signin_cubit.dart';
 abstract class SigninState with _$SigninState {
   const factory SigninState({
     required bool isLoading,
-    required Option<Either<MainFailure, SignInModel>> isFailureOrSuccess,
+    required Option<Either<MainFailure, AuthResponse>> isFailureOrSuccess,
   }) = _SigninState;
 
   factory SigninState.initial() =>

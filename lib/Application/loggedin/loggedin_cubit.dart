@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:catering/Domain/TokenManager/token_service.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:catering/Domain/LoggedIn/logged_in_service.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
 part 'loggedin_state.dart';
@@ -9,18 +9,26 @@ part 'loggedin_cubit.freezed.dart';
 
 @injectable
 class LoggedinCubit extends Cubit<LoggedinState> {
-  final LoggedInService loggedInService;
   final TokenService tokenService;
-  LoggedinCubit(this.loggedInService, this.tokenService)
+  final LoggedInService loggedInService;
+
+  LoggedinCubit(this.tokenService, this.loggedInService)
     : super(LoggedinState.initial());
 
-  isLoggedIn() async {
-    await Future.delayed(const Duration(seconds: 4));
-    final response = await loggedInService.isLoggedIn();
-    emit(state.copyWith(value: response));
+  Future<void> checkSession() async {
+    final token = await tokenService.getToken();
+    final onboarded = await loggedInService.isOnboarded();
+    
+    if (token != null) {
+      final role = await tokenService.getRole();
+      emit(state.copyWith(value: true, role: role, isOnboarded: onboarded));
+    } else {
+      emit(state.copyWith(value: false, role: null, isOnboarded: onboarded));
+    }
   }
 
-  deleteEmail() async {
-    await tokenService.deleteEmail();
+  Future<void> clearSession() async {
+    await tokenService.clearAll();
+    emit(state.copyWith(value: false, role: null));
   }
 }

@@ -1,0 +1,99 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : 
+At line:1 char:1
++ flutter build apk 
+--debug > build_log.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecified:   
+  (:String) [], Remote   
+ Exception
+    + FullyQualifiedErro 
+   rId : NativeCommandE  
+  rror
+ 
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+Execution failed for 
+task ':app:checkDebugAarM
+etadata'.
+> A failure occurred 
+while executing com.andro
+id.build.gradle.internal.
+tasks.CheckAarMetadataWor
+kAction
+   > 5 issues were found 
+when checking AAR 
+metadata:
+
+       1.  Dependency 'an
+droidx.activity:activity-
+ktx:1.12.4' requires 
+Android Gradle plugin 
+8.9.1 or higher.
+
+           This build 
+currently uses Android 
+Gradle plugin 8.7.0.
+
+       2.  Dependency 'an
+droidx.activity:activity:
+1.12.4' requires Android 
+Gradle plugin 8.9.1 or 
+higher.
+
+           This build 
+currently uses Android 
+Gradle plugin 8.7.0.
+
+       3.  Dependency 'an
+droidx.core:core-ktx:1.18
+.0' requires Android 
+Gradle plugin 8.9.1 or 
+higher.
+
+           This build 
+currently uses Android 
+Gradle plugin 8.7.0.
+
+       4.  Dependency 'an
+droidx.core:core:1.18.0' 
+requires Android Gradle 
+plugin 8.9.1 or higher.
+
+           This build 
+currently uses Android 
+Gradle plugin 8.7.0.
+
+       5.  Dependency 'an
+droidx.navigationevent:na
+vigationevent-android:1.0
+.2' requires Android 
+Gradle plugin 8.9.1 or 
+higher.
+
+           This build 
+currently uses Android 
+Gradle plugin 8.7.0.
+
+* Try:
+> Run with --stacktrace 
+option to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to get 
+full insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 6s
+Running Gradle task 'assembleDebug'...                              6.4s
+Gradle task 
+assembleDebug failed 
+with exit code 1
