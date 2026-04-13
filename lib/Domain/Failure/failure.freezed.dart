@@ -141,6 +141,38 @@ String toString() {
 /// @nodoc
 
 
+class AuthNotFound implements MainFailure {
+  const AuthNotFound();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthNotFound);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'MainFailure.authNotFound()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
 class IncorrectCredential implements MainFailure {
   const IncorrectCredential();
   

@@ -5,6 +5,9 @@ import 'package:catering/Domain/bookings/booking_service.dart';
 import 'package:catering/Domain/Failure/failure.dart';
 import 'package:catering/Domain/Service/service_management_service.dart';
 import 'package:catering/Infrastructure/Core/socket_service.dart';
+import 'package:catering/Domain/Owner/owner_service.dart';
+import 'package:catering/Domain/Service/service_model.dart';
+import 'package:catering/Domain/SignIn/sign_in_model/user_model.dart';
 import 'package:dartz/dartz.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -16,9 +19,10 @@ part 'owner_cubit.freezed.dart';
 class OwnerCubit extends Cubit<OwnerState> {
   final BookingService _bookingService;
   final ServiceManagementService _serviceService;
+  final OwnerService _ownerService;
   final SocketService _socketService;
 
-  OwnerCubit(this._bookingService, this._serviceService, this._socketService)
+  OwnerCubit(this._bookingService, this._serviceService, this._ownerService, this._socketService)
       : super(OwnerState.initial());
 
   Future<void> fetchBookings() async {
@@ -60,6 +64,25 @@ class OwnerCubit extends Cubit<OwnerState> {
       fetchBookings(); // Refresh list
     });
   }
+
+  Future<void> fetchServices() async {
+    emit(state.copyWith(isLoading: true));
+    final result = await _serviceService.viewServices();
+    emit(state.copyWith(
+      isLoading: false,
+      services: result.getOrElse(() => []),
+    ));
+  }
+
+  Future<void> fetchStaff() async {
+    emit(state.copyWith(isLoading: true));
+    final result = await _ownerService.viewStaff();
+    emit(state.copyWith(
+      isLoading: false,
+      staffList: result.getOrElse(() => []),
+    ));
+  }
+
 
   @override
   Future<void> close() {

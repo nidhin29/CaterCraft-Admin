@@ -16,7 +16,7 @@ class BookingRepo implements BookingService {
       final response = await _dio.get('api/v1/booking/User/view-bookings');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final bookings = data.map((json) => BookingModel.fromJson(json as Map<String, dynamic>)).toList();
         return Right(bookings);
       } else {

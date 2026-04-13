@@ -17,7 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$UserModel {
 
 @JsonKey(name: 'email') String get email;@JsonKey(name: 'role') int get role;// 1 for Owner, 2 for Staff
-@JsonKey(name: 'name') String? get name;
+@JsonKey(name: 'name') String? get name;@JsonKey(name: 'companyName') String? get companyName;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,16 +30,16 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.companyName, companyName) || other.companyName == companyName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,email,role,name);
+int get hashCode => Object.hash(runtimeType,email,role,name,companyName);
 
 @override
 String toString() {
-  return 'UserModel(email: $email, role: $role, name: $name)';
+  return 'UserModel(email: $email, role: $role, name: $name, companyName: $companyName)';
 }
 
 
@@ -50,7 +50,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'email') String email,@JsonKey(name: 'role') int role,@JsonKey(name: 'name') String? name
+@JsonKey(name: 'email') String email,@JsonKey(name: 'role') int role,@JsonKey(name: 'name') String? name,@JsonKey(name: 'companyName') String? companyName
 });
 
 
@@ -67,11 +67,12 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? role = null,Object? name = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? role = null,Object? name = freezed,Object? companyName = freezed,}) {
   return _then(_self.copyWith(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as int,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,companyName: freezed == companyName ? _self.companyName : companyName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -83,13 +84,14 @@ as String?,
 @JsonSerializable()
 
 class _UserModel implements UserModel {
-  const _UserModel({@JsonKey(name: 'email') required this.email, @JsonKey(name: 'role') required this.role, @JsonKey(name: 'name') this.name});
+  const _UserModel({@JsonKey(name: 'email') required this.email, @JsonKey(name: 'role') required this.role, @JsonKey(name: 'name') this.name, @JsonKey(name: 'companyName') this.companyName});
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override@JsonKey(name: 'email') final  String email;
 @override@JsonKey(name: 'role') final  int role;
 // 1 for Owner, 2 for Staff
 @override@JsonKey(name: 'name') final  String? name;
+@override@JsonKey(name: 'companyName') final  String? companyName;
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
@@ -104,16 +106,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.companyName, companyName) || other.companyName == companyName));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,email,role,name);
+int get hashCode => Object.hash(runtimeType,email,role,name,companyName);
 
 @override
 String toString() {
-  return 'UserModel(email: $email, role: $role, name: $name)';
+  return 'UserModel(email: $email, role: $role, name: $name, companyName: $companyName)';
 }
 
 
@@ -124,7 +126,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'email') String email,@JsonKey(name: 'role') int role,@JsonKey(name: 'name') String? name
+@JsonKey(name: 'email') String email,@JsonKey(name: 'role') int role,@JsonKey(name: 'name') String? name,@JsonKey(name: 'companyName') String? companyName
 });
 
 
@@ -141,11 +143,12 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? role = null,Object? name = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? role = null,Object? name = freezed,Object? companyName = freezed,}) {
   return _then(_UserModel(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as int,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,companyName: freezed == companyName ? _self.companyName : companyName // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

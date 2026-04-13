@@ -35,7 +35,7 @@ class BookingDetailScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildDetailSection("Service Details", [
                     _detailRow(Icons.restaurant_menu_outlined, booking.service.name),
-                    _detailRow(Icons.description_outlined, booking.service.description ?? "No description provided"),
+                    _detailRow(Icons.description_outlined, booking.service.description),
                     _detailRow(Icons.currency_rupee, "${booking.service.rate} / person"),
                   ]),
                   const SizedBox(height: 32),

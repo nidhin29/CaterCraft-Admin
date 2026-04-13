@@ -10,6 +10,7 @@ abstract class AuthResponse with _$AuthResponse {
     @JsonKey(name: 'accessToken') String? accessToken,
     @JsonKey(name: 'refreshToken') String? refreshToken,
     @JsonKey(name: 'user') UserModel? user,
+    @JsonKey(name: 'owner') UserModel? owner,
   }) = _AuthResponse;
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) => _$AuthResponseFromJson(json);

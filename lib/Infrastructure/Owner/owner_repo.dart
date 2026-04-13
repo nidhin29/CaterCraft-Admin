@@ -17,7 +17,7 @@ class OwnerRepo implements OwnerService {
     try {
       final response = await _dio.get('api/v1/owner/view-staff');
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final staffList = data.map((json) => UserModel.fromJson(json as Map<String, dynamic>)).toList();
         return Right(staffList);
       }

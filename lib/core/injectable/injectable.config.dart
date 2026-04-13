@@ -77,6 +77,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i980.OwnerCubit(
         gh<_i346.BookingService>(),
         gh<_i951.ServiceManagementService>(),
+        gh<_i430.OwnerService>(),
         gh<_i717.SocketService>(),
       ),
     );

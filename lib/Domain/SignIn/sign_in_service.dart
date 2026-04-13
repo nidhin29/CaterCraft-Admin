@@ -20,13 +20,12 @@ abstract class SignInService {
   });
 
   Future<Either<MainFailure, AuthResponse>> googleLogin({
-    required String email,
+    required String tokenID,
   });
 
   Future<Either<MainFailure, AuthResponse>> googleRegister({
-    required String name,
-    required String email,
-    required String idToken,
+    required String companyName,
+    required String tokenID,
     required File license,
   });
 
@@ -34,7 +33,7 @@ abstract class SignInService {
     required String email,
   });
 
-  Future<Either<MainFailure, Unit>> verifyOtp({
+  Future<Either<MainFailure, AuthResponse>> verifyOtp({
     required String email,
     required String otp,
   });

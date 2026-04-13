@@ -102,20 +102,20 @@ class SignInRepo implements SignInService {
   }
 
   @override
-  Future<Either<MainFailure, AuthResponse>> googleLogin({required String email}) async {
+  Future<Either<MainFailure, AuthResponse>> googleLogin({required String tokenID}) async {
     try {
       final response = await _dio.post(
         'api/v1/owner/google-login',
-        data: {'email': email},
+        data: {'tokenID': tokenID},
       );
       if (response.statusCode == 200) {
-        return Right(AuthResponse.fromJson(response.data));
+        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
       log('Google Login Error: $e');
       if (e is DioException && e.response?.statusCode == 404) {
-        return const Left(MainFailure.authFailure());
+        return const Left(MainFailure.authNotFound());
       }
       return const Left(MainFailure.serverFailure());
     }
@@ -123,16 +123,14 @@ class SignInRepo implements SignInService {
 
   @override
   Future<Either<MainFailure, AuthResponse>> googleRegister({
-    required String name,
-    required String email,
-    required String idToken,
+    required String companyName,
+    required String tokenID,
     required File license,
   }) async {
     try {
       final formData = FormData.fromMap({
-        'name': name,
-        'email': email,
-        'tokens': idToken,
+        'companyName': companyName,
+        'tokenID': tokenID,
         'license': await MultipartFile.fromFile(
           license.path,
           filename: license.path.split('/').last,
@@ -171,7 +169,7 @@ class SignInRepo implements SignInService {
   }
 
   @override
-  Future<Either<MainFailure, Unit>> verifyOtp({
+  Future<Either<MainFailure, AuthResponse>> verifyOtp({
     required String email,
     required String otp,
   }) async {
@@ -180,7 +178,9 @@ class SignInRepo implements SignInService {
         'api/v1/owner/verify-otp',
         data: {'email': email, 'otp': otp},
       );
-      if (response.statusCode == 200) return const Right(unit);
+      if (response.statusCode == 200) {
+        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
+      }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
       log('Verify OTP Error: $e');

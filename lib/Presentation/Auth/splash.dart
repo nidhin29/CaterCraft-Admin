@@ -1,7 +1,7 @@
 import 'package:catering/Presentation/common/theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:catering/Application/loggedin/loggedin_cubit.dart';
-import 'package:catering/Presentation/Home/owner_dashboard.dart';
+import 'package:catering/Presentation/Home/owner_home.dart';
 import 'package:catering/Presentation/Home/staff_dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:catering/Presentation/Auth/signin.dart';
@@ -52,7 +52,7 @@ class SplashScreenState extends State<SplashScreen>
           if (state.value) {
             if (state.role == 1) {
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const OwnerDashboard()),
+                MaterialPageRoute(builder: (context) => const OwnerHomeScreen()),
               );
             } else {
               Navigator.of(context).pushReplacement(

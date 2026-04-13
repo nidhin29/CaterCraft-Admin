@@ -14,6 +14,10 @@ _AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) =>
           json['user'] == null
               ? null
               : UserModel.fromJson(json['user'] as Map<String, dynamic>),
+      owner:
+          json['owner'] == null
+              ? null
+              : UserModel.fromJson(json['owner'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AuthResponseToJson(_AuthResponse instance) =>
@@ -21,6 +25,7 @@ Map<String, dynamic> _$AuthResponseToJson(_AuthResponse instance) =>
       'accessToken': instance.accessToken,
       'refreshToken': instance.refreshToken,
       'user': instance.user,
+      'owner': instance.owner,
     };
 
 _BaseApiResponse<T> _$BaseApiResponseFromJson<T>(

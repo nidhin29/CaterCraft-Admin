@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:catering/Application/signin/signin_cubit.dart';
 import 'package:catering/Domain/Failure/failure.dart';
-import 'package:catering/Presentation/Home/owner_dashboard.dart';
+import 'package:catering/Presentation/Home/owner_home.dart';
 import 'package:catering/Presentation/Home/staff_dashboard.dart';
 import 'package:catering/Presentation/Auth/register.dart';
 import 'package:catering/Presentation/common/snack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,11 +25,132 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int _selectedRole = 1; // 1 for Owner, 2 for Staff
 
+  void _showGoogleRegisterDialog(BuildContext context, String tokenID) {
+    final TextEditingController companyController = TextEditingController();
+    File? licenseFile;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1A1A1A),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.white.withOpacity(0.1))),
+          title: Text("Complete Registration", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Please provide your business details to continue.", style: GoogleFonts.outfit(color: Colors.white54, fontSize: 13)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: companyController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Company Name",
+                  labelStyle: const TextStyle(color: Colors.white38),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.05),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () async {
+                  final picker = ImagePicker();
+                  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                  if (pickedFile != null) {
+                    setDialogState(() => licenseFile = File(pickedFile.path));
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: licenseFile != null ? Colors.cyan : Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(licenseFile != null ? Icons.check_circle : Icons.upload_file, color: licenseFile != null ? Colors.cyan : Colors.white38),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          licenseFile != null ? "License Uploaded" : "Upload Business License",
+                          style: TextStyle(color: licenseFile != null ? Colors.cyan : Colors.white38, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("CANCEL", style: TextStyle(color: Colors.white38)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.cyan,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                if (companyController.text.isNotEmpty && licenseFile != null) {
+                  context.read<SigninCubit>().googleRegister(
+                    companyName: companyController.text.trim(),
+                    tokenID: tokenID,
+                    license: licenseFile!,
+                  );
+                  Navigator.pop(context);
+                } else {
+                  displaySnackBar(context: context, text: "Please fill all details");
+                }
+              },
+              child: const Text("FINISH", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Future<void> _handleGoogleAuth(BuildContext context) async {
+    try {
+      final googleSignIn = GoogleSignIn(
+        serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],
+      );
+      
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return; // User cancelled
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken != null) {
+        if (mounted) {
+          context.read<SigninCubit>().googleLogin(idToken);
+        }
+      } else {
+        if (mounted) {
+          displaySnackBar(context: context, text: "Failed to get Google ID Token");
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        displaySnackBar(context: context, text: "Google Sign-In Error: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<SigninCubit, SigninState>(
         listener: (context, state) {
+          if (state.isGoogleRegistrationRequired) {
+            _showGoogleRegisterDialog(context, state.googleTokenID!);
+          }
           state.isFailureOrSuccess.fold(
             () => null,
             (either) => either.fold(
@@ -36,19 +161,23 @@ class _LoginPageState extends State<LoginPage> {
                     message = "Server is down";
                   } else if (failure == const MainFailure.authFailure()) {
                     message = "Please check the email address";
+                  } else if (failure == const MainFailure.authNotFound()) {
+                     // Handled by registration dialog
                   } else if (failure == const MainFailure.incorrectCredential()) {
                     message = "Incorrect Password";
                   } else if (failure == const MainFailure.clientFailure()) {
                     message = "Something wrong with your network";
                   }
-                  displaySnackBar(context: context, text: message);
+                  if (failure != const MainFailure.authNotFound()) {
+                    displaySnackBar(context: context, text: message);
+                  }
                 }
               },
               (success) {
                 final role = _selectedRole;
                 if (role == 1) {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const OwnerDashboard()),
+                    MaterialPageRoute(builder: (context) => const OwnerHomeScreen()),
                     (route) => false,
                   );
                 } else {
@@ -230,49 +359,25 @@ class _LoginPageState extends State<LoginPage> {
                                 width: double.infinity,
                                 height: 56,
                                 child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    if (emailController.text.isNotEmpty) {
-                                      context.read<SigninCubit>().googleLogin(emailController.text.trim());
-                                    } else {
-                                      displaySnackBar(context: context, text: "Please enter your email for Google verification");
-                                    }
-                                  },
-                                  icon: Image.network(
-                                    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
-                                    height: 20,
-                                  ),
-                                  label: const Text("CONTINUE WITH GOOGLE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1)),
+                                  onPressed: state.isLoading 
+                                      ? null 
+                                      : () => _handleGoogleAuth(context),
+                                  icon: state.isLoading
+                                      ? const SizedBox.shrink()
+                                      : Image.network(
+                                          "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+                                          height: 20,
+                                        ),
+                                  label: state.isLoading
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        )
+                                      : const Text("CONTINUE WITH GOOGLE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1)),
                                   style: OutlinedButton.styleFrom(
                                     side: BorderSide(color: Colors.white.withOpacity(0.1)),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              // Preview Mode Button
-                              Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    if (_selectedRole == 1) {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(builder: (context) => const OwnerDashboard()),
-                                        (route) => false,
-                                      );
-                                    } else {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(builder: (context) => const StaffDashboard()),
-                                        (route) => false,
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    "PREVIEW DESIGN (GUEST)",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white38,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1,
-                                    ),
                                   ),
                                 ),
                               ),
@@ -312,21 +417,28 @@ class _LoginPageState extends State<LoginPage> {
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedRole = role),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? (role == 1 ? Colors.blueAccent : Colors.orangeAccent) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? Colors.transparent : Colors.white24,
-            ),
+            boxShadow: isSelected ? [
+              BoxShadow(
+                color: (role == 1 ? Colors.blueAccent : Colors.orangeAccent).withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ] : [],
           ),
           child: Center(
             child: Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : Colors.white54,
+              label.toUpperCase(),
+              style: GoogleFonts.outfit(
+                color: isSelected ? Colors.white : Colors.white38,
                 fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 1,
               ),
             ),
           ),

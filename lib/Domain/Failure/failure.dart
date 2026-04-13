@@ -6,6 +6,7 @@ class MainFailure with _$MainFailure {
   const factory MainFailure.clientFailure() = _ClientFailure;
   const factory MainFailure.serverFailure() = _ServerFailure;
   const factory MainFailure.authFailure() = AuthFailure;
+  const factory MainFailure.authNotFound() = AuthNotFound;
   const factory MainFailure.incorrectCredential() = IncorrectCredential;
   const factory MainFailure.otherFailure() = otherFailure;
 }

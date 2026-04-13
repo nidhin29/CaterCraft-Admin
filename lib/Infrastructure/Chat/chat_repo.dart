@@ -17,7 +17,7 @@ class ChatRepo implements ChatService {
     try {
       final response = await _dio.get('api/v1/chat/history/$roomId');
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final history = data.map((json) => MessageModel.fromJson(json as Map<String, dynamic>)).toList();
         return Right(history);
       }
@@ -33,7 +33,8 @@ class ChatRepo implements ChatService {
     try {
       final response = await _dio.get('api/v1/chat/recent');
       if (response.statusCode == 200) {
-        return Right(response.data as List<dynamic>);
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
+        return Right(data);
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {

@@ -58,7 +58,7 @@ class ServiceManagementRepo implements ServiceManagementService {
     try {
       final response = await _dio.get('api/v1/owner/view-services');
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data as List<dynamic>;
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final services = data.map((json) => ServiceModel.fromJson(json as Map<String, dynamic>)).toList();
         return Right(services);
       }
