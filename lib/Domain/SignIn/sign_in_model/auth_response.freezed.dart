@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthResponse {
 
-@JsonKey(name: 'accessToken') String? get accessToken;@JsonKey(name: 'refreshToken') String? get refreshToken;@JsonKey(name: 'user') UserModel? get user;@JsonKey(name: 'owner') UserModel? get owner;
+@JsonKey(name: 'accessToken') String? get accessToken;@JsonKey(name: 'token') String? get token;@JsonKey(name: 'refreshToken') String? get refreshToken;@JsonKey(name: 'user') UserModel? get user;@JsonKey(name: 'owner') UserModel? get owner;@JsonKey(name: 'staff') UserModel? get staff;
 /// Create a copy of AuthResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $AuthResponseCopyWith<AuthResponse> get copyWith => _$AuthResponseCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponse&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user)&&(identical(other.owner, owner) || other.owner == owner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponse&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.token, token) || other.token == token)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.staff, staff) || other.staff == staff));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accessToken,refreshToken,user,owner);
+int get hashCode => Object.hash(runtimeType,accessToken,token,refreshToken,user,owner,staff);
 
 @override
 String toString() {
-  return 'AuthResponse(accessToken: $accessToken, refreshToken: $refreshToken, user: $user, owner: $owner)';
+  return 'AuthResponse(accessToken: $accessToken, token: $token, refreshToken: $refreshToken, user: $user, owner: $owner, staff: $staff)';
 }
 
 
@@ -49,11 +49,11 @@ abstract mixin class $AuthResponseCopyWith<$Res>  {
   factory $AuthResponseCopyWith(AuthResponse value, $Res Function(AuthResponse) _then) = _$AuthResponseCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'accessToken') String? accessToken,@JsonKey(name: 'refreshToken') String? refreshToken,@JsonKey(name: 'user') UserModel? user,@JsonKey(name: 'owner') UserModel? owner
+@JsonKey(name: 'accessToken') String? accessToken,@JsonKey(name: 'token') String? token,@JsonKey(name: 'refreshToken') String? refreshToken,@JsonKey(name: 'user') UserModel? user,@JsonKey(name: 'owner') UserModel? owner,@JsonKey(name: 'staff') UserModel? staff
 });
 
 
-$UserModelCopyWith<$Res>? get user;$UserModelCopyWith<$Res>? get owner;
+$UserModelCopyWith<$Res>? get user;$UserModelCopyWith<$Res>? get owner;$UserModelCopyWith<$Res>? get staff;
 
 }
 /// @nodoc
@@ -66,12 +66,14 @@ class _$AuthResponseCopyWithImpl<$Res>
 
 /// Create a copy of AuthResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? accessToken = freezed,Object? refreshToken = freezed,Object? user = freezed,Object? owner = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? accessToken = freezed,Object? token = freezed,Object? refreshToken = freezed,Object? user = freezed,Object? owner = freezed,Object? staff = freezed,}) {
   return _then(_self.copyWith(
 accessToken: freezed == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
+as String?,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
 as String?,refreshToken: freezed == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
 as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserModel?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
+as UserModel?,staff: freezed == staff ? _self.staff : staff // ignore: cast_nullable_to_non_nullable
 as UserModel?,
   ));
 }
@@ -99,6 +101,18 @@ $UserModelCopyWith<$Res>? get owner {
   return $UserModelCopyWith<$Res>(_self.owner!, (value) {
     return _then(_self.copyWith(owner: value));
   });
+}/// Create a copy of AuthResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserModelCopyWith<$Res>? get staff {
+    if (_self.staff == null) {
+    return null;
+  }
+
+  return $UserModelCopyWith<$Res>(_self.staff!, (value) {
+    return _then(_self.copyWith(staff: value));
+  });
 }
 }
 
@@ -107,13 +121,15 @@ $UserModelCopyWith<$Res>? get owner {
 @JsonSerializable()
 
 class _AuthResponse implements AuthResponse {
-  const _AuthResponse({@JsonKey(name: 'accessToken') this.accessToken, @JsonKey(name: 'refreshToken') this.refreshToken, @JsonKey(name: 'user') this.user, @JsonKey(name: 'owner') this.owner});
+  const _AuthResponse({@JsonKey(name: 'accessToken') this.accessToken, @JsonKey(name: 'token') this.token, @JsonKey(name: 'refreshToken') this.refreshToken, @JsonKey(name: 'user') this.user, @JsonKey(name: 'owner') this.owner, @JsonKey(name: 'staff') this.staff});
   factory _AuthResponse.fromJson(Map<String, dynamic> json) => _$AuthResponseFromJson(json);
 
 @override@JsonKey(name: 'accessToken') final  String? accessToken;
+@override@JsonKey(name: 'token') final  String? token;
 @override@JsonKey(name: 'refreshToken') final  String? refreshToken;
 @override@JsonKey(name: 'user') final  UserModel? user;
 @override@JsonKey(name: 'owner') final  UserModel? owner;
+@override@JsonKey(name: 'staff') final  UserModel? staff;
 
 /// Create a copy of AuthResponse
 /// with the given fields replaced by the non-null parameter values.
@@ -128,16 +144,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponse&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user)&&(identical(other.owner, owner) || other.owner == owner));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponse&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.token, token) || other.token == token)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.staff, staff) || other.staff == staff));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,accessToken,refreshToken,user,owner);
+int get hashCode => Object.hash(runtimeType,accessToken,token,refreshToken,user,owner,staff);
 
 @override
 String toString() {
-  return 'AuthResponse(accessToken: $accessToken, refreshToken: $refreshToken, user: $user, owner: $owner)';
+  return 'AuthResponse(accessToken: $accessToken, token: $token, refreshToken: $refreshToken, user: $user, owner: $owner, staff: $staff)';
 }
 
 
@@ -148,11 +164,11 @@ abstract mixin class _$AuthResponseCopyWith<$Res> implements $AuthResponseCopyWi
   factory _$AuthResponseCopyWith(_AuthResponse value, $Res Function(_AuthResponse) _then) = __$AuthResponseCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'accessToken') String? accessToken,@JsonKey(name: 'refreshToken') String? refreshToken,@JsonKey(name: 'user') UserModel? user,@JsonKey(name: 'owner') UserModel? owner
+@JsonKey(name: 'accessToken') String? accessToken,@JsonKey(name: 'token') String? token,@JsonKey(name: 'refreshToken') String? refreshToken,@JsonKey(name: 'user') UserModel? user,@JsonKey(name: 'owner') UserModel? owner,@JsonKey(name: 'staff') UserModel? staff
 });
 
 
-@override $UserModelCopyWith<$Res>? get user;@override $UserModelCopyWith<$Res>? get owner;
+@override $UserModelCopyWith<$Res>? get user;@override $UserModelCopyWith<$Res>? get owner;@override $UserModelCopyWith<$Res>? get staff;
 
 }
 /// @nodoc
@@ -165,12 +181,14 @@ class __$AuthResponseCopyWithImpl<$Res>
 
 /// Create a copy of AuthResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? accessToken = freezed,Object? refreshToken = freezed,Object? user = freezed,Object? owner = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? accessToken = freezed,Object? token = freezed,Object? refreshToken = freezed,Object? user = freezed,Object? owner = freezed,Object? staff = freezed,}) {
   return _then(_AuthResponse(
 accessToken: freezed == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
+as String?,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
 as String?,refreshToken: freezed == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
 as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
 as UserModel?,owner: freezed == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
+as UserModel?,staff: freezed == staff ? _self.staff : staff // ignore: cast_nullable_to_non_nullable
 as UserModel?,
   ));
 }
@@ -198,6 +216,18 @@ $UserModelCopyWith<$Res>? get owner {
 
   return $UserModelCopyWith<$Res>(_self.owner!, (value) {
     return _then(_self.copyWith(owner: value));
+  });
+}/// Create a copy of AuthResponse
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserModelCopyWith<$Res>? get staff {
+    if (_self.staff == null) {
+    return null;
+  }
+
+  return $UserModelCopyWith<$Res>(_self.staff!, (value) {
+    return _then(_self.copyWith(staff: value));
   });
 }
 }

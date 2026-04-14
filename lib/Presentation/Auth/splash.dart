@@ -2,7 +2,7 @@ import 'package:catering/Presentation/common/theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:catering/Application/loggedin/loggedin_cubit.dart';
 import 'package:catering/Presentation/Home/owner_home.dart';
-import 'package:catering/Presentation/Home/staff_dashboard.dart';
+import 'package:catering/Presentation/Home/staff_home.dart';
 import 'package:flutter/material.dart';
 import 'package:catering/Presentation/Auth/signin.dart';
 import 'package:catering/Presentation/Onboarding/onboarding.dart';
@@ -56,7 +56,7 @@ class SplashScreenState extends State<SplashScreen>
               );
             } else {
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => const StaffDashboard()),
+                MaterialPageRoute(builder: (context) => const StaffHomeScreen()),
               );
             }
           } else if (!state.isOnboarded) {

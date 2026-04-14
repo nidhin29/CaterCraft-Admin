@@ -1,3 +1,4 @@
+import 'package:catering/Presentation/Home/notifications_screen.dart';
 import 'package:catering/Presentation/Home/profile.dart';
 import 'package:catering/Presentation/Home/booking_detail.dart';
 import 'package:catering/Application/Owner/owner_cubit.dart';
@@ -16,35 +17,46 @@ class DashboardTab extends StatelessWidget {
       slivers: [
         _buildAppBar(context),
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildWelcomeHeader(),
-                const SizedBox(height: 32),
-                _buildStatSection(),
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: BlocBuilder<OwnerCubit, OwnerState>(
+            builder: (context, state) {
+              final owner = state.ownerDetails.fold(() => null, (u) => u);
+              final isVerified = owner?.verificationStatus?.toLowerCase() == "verified";
+
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Recent Bookings",
-                      style: GoogleFonts.outfit(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    if (!isVerified) ...[
+                      _buildVerificationBanner(),
+                      const SizedBox(height: 24),
+                    ],
+                    _buildWelcomeHeader(owner?.companyName ?? "CaterCraft"),
+                    const SizedBox(height: 32),
+                    _buildStatSection(),
+                    const SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Recent Bookings",
+                          style: GoogleFonts.outfit(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text("See All", style: TextStyle(color: AppTheme.ownerAccent.withOpacity(0.8))),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text("See All", style: TextStyle(color: AppTheme.ownerAccent.withOpacity(0.8))),
-                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
-                const SizedBox(height: 16),
-              ],
-            ),
+              );
+            },
           ),
         ),
         _buildBookingsList(),
@@ -59,6 +71,10 @@ class DashboardTab extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
+      leading: IconButton(
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen())),
+        icon: const Icon(Icons.account_circle_outlined, color: Colors.white70, size: 28),
+      ),
       title: Text(
         "CATERCRAFT",
         style: GoogleFonts.outfit(
@@ -70,20 +86,20 @@ class DashboardTab extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen())),
-          icon: const Icon(Icons.account_circle_outlined, color: Colors.white70, size: 28),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationsScreen())),
+          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white70, size: 28),
         ),
         const SizedBox(width: 8),
       ],
     );
   }
 
-  Widget _buildWelcomeHeader() {
+  Widget _buildWelcomeHeader(String companyName) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Field Operations",
+          companyName.toUpperCase(),
           style: GoogleFonts.outfit(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -102,6 +118,38 @@ class DashboardTab extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildVerificationBanner() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.amberAccent.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amberAccent.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.amberAccent, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  "Account Under Review",
+                  style: TextStyle(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  "Your business license is being verified. You can explore the dashboard, but adding services is restricted until verified.",
+                  style: TextStyle(color: Colors.white54, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

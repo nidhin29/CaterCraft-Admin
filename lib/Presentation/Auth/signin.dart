@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:catering/Application/signin/signin_cubit.dart';
 import 'package:catering/Domain/Failure/failure.dart';
 import 'package:catering/Presentation/Home/owner_home.dart';
-import 'package:catering/Presentation/Home/staff_dashboard.dart';
+import 'package:catering/Presentation/Home/staff_home.dart';
 import 'package:catering/Presentation/Auth/register.dart';
 import 'package:catering/Presentation/common/snack.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   void _showGoogleRegisterDialog(BuildContext context, String tokenID) {
     final TextEditingController companyController = TextEditingController();
     File? licenseFile;
+    File? logoFile;
 
     showDialog(
       context: context,
@@ -84,6 +85,37 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () async {
+                  final picker = ImagePicker();
+                  final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+                  if (pickedFile != null) {
+                    setDialogState(() => logoFile = File(pickedFile.path));
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: logoFile != null ? Colors.cyan : Colors.white12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(logoFile != null ? Icons.photo_size_select_actual_outlined : Icons.add_photo_alternate_outlined, color: logoFile != null ? Colors.cyan : Colors.white38),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          logoFile != null ? "Logo Selected" : "Upload Company Logo",
+                          style: TextStyle(color: logoFile != null ? Colors.cyan : Colors.white38, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
           actions: [
@@ -97,15 +129,16 @@ class _LoginPageState extends State<LoginPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               onPressed: () {
-                if (companyController.text.isNotEmpty && licenseFile != null) {
+                if (companyController.text.isNotEmpty && licenseFile != null && logoFile != null) {
                   context.read<SigninCubit>().googleRegister(
                     companyName: companyController.text.trim(),
                     tokenID: tokenID,
                     license: licenseFile!,
+                    logo: logoFile!,
                   );
                   Navigator.pop(context);
                 } else {
-                  displaySnackBar(context: context, text: "Please fill all details");
+                  displaySnackBar(context: context, text: licenseFile == null ? "License required" : (logoFile == null ? "Company logo required" : "Fill all details"));
                 }
               },
               child: const Text("FINISH", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -182,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 } else {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const StaffDashboard()),
+                    MaterialPageRoute(builder: (context) => const StaffHomeScreen()),
                     (route) => false,
                   );
                 }
@@ -343,60 +376,64 @@ class _LoginPageState extends State<LoginPage> {
                                         ),
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Row(
-                                children: [
-                                  Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 16),
-                                    child: Text("OR", style: TextStyle(color: Colors.white24, fontSize: 10, letterSpacing: 2)),
-                                  ),
-                                  Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: OutlinedButton.icon(
-                                  onPressed: state.isLoading 
-                                      ? null 
-                                      : () => _handleGoogleAuth(context),
-                                  icon: state.isLoading
-                                      ? const SizedBox.shrink()
-                                      : Image.network(
-                                          "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
-                                          height: 20,
-                                        ),
-                                  label: state.isLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                        )
-                                      : const Text("CONTINUE WITH GOOGLE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1)),
-                                  style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: Colors.white.withOpacity(0.1)),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  ),
+                              if (_selectedRole == 1) ...[ // Only show for Owner
+                                const SizedBox(height: 24),
+                                Row(
+                                  children: [
+                                    Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text("OR", style: TextStyle(color: Colors.white24, fontSize: 10, letterSpacing: 2)),
+                                    ),
+                                    Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              Center(
-                                child: TextButton(
-                                  onPressed: () => Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (context) => const RegisterPage()),
-                                  ),
-                                  child: Text(
-                                    "NEW OWNER? REGISTER HERE",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white30,
-                                      fontSize: 10,
-                                      letterSpacing: 2,
+                                const SizedBox(height: 24),
+                              ],
+                              if (_selectedRole == 1) // Only show for Owner
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: OutlinedButton.icon(
+                                    onPressed: state.isLoading 
+                                        ? null 
+                                        : () => _handleGoogleAuth(context),
+                                    icon: state.isLoading
+                                        ? const SizedBox.shrink()
+                                        : Image.network(
+                                            "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
+                                            height: 20,
+                                          ),
+                                    label: state.isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                          )
+                                        : const Text("CONTINUE WITH GOOGLE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1)),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: Colors.white.withOpacity(0.1)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                     ),
                                   ),
                                 ),
-                              ),
+                              const SizedBox(height: 16),
+                              if (_selectedRole == 1) // Only show for Owner
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => const RegisterPage()),
+                                    ),
+                                    child: Text(
+                                      "NEW OWNER? REGISTER HERE",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white30,
+                                        fontSize: 10,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),

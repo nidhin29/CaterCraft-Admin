@@ -24,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   File? _licenseFile;
+  File? _logoFile;
 
   Future<void> _handleGoogleAuth(BuildContext context) async {
     try {
@@ -58,9 +59,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _pickLicense() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     if (picked != null) {
       setState(() => _licenseFile = File(picked.path));
+    }
+  }
+
+  Future<void> _pickLogo() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (picked != null) {
+      setState(() => _logoFile = File(picked.path));
     }
   }
 
@@ -147,6 +156,33 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 20),
+                              
+                              // Logo Upload
+                              InkWell(
+                                onTap: state.isLoading ? null : _pickLogo,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white24, style: BorderStyle.solid),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.add_photo_alternate_outlined, color: _logoFile != null ? AppTheme.ownerAccent : Colors.white54),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          _logoFile != null ? _logoFile!.path.split('/').last : "Official Company Logo",
+                                          style: TextStyle(color: _logoFile != null ? Colors.white : Colors.white30),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 40),
                               
                               SizedBox(
@@ -156,16 +192,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                   onPressed: state.isLoading 
                                       ? null 
                                       : () {
-                                          if (_formKey.currentState!.validate() && _licenseFile != null) {
+                                          if (_formKey.currentState!.validate() && _licenseFile != null && _logoFile != null) {
                                             context.read<SigninCubit>().registerOwner(
                                                   name: nameController.text.trim(),
                                                   email: emailController.text.trim(),
                                                   password: passwordController.text.trim(),
                                                   license: _licenseFile!,
+                                                  logo: _logoFile!,
                                                 );
                                           } else if (_licenseFile == null) {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               const SnackBar(content: Text("Please upload your business license")),
+                                            );
+                                          } else if (_logoFile == null) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              const SnackBar(content: Text("Please upload your official company logo")),
                                             );
                                           }
                                         },

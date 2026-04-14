@@ -9,6 +9,7 @@ part of 'auth_response.dart';
 _AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) =>
     _AuthResponse(
       accessToken: json['accessToken'] as String?,
+      token: json['token'] as String?,
       refreshToken: json['refreshToken'] as String?,
       user:
           json['user'] == null
@@ -18,14 +19,20 @@ _AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) =>
           json['owner'] == null
               ? null
               : UserModel.fromJson(json['owner'] as Map<String, dynamic>),
+      staff:
+          json['staff'] == null
+              ? null
+              : UserModel.fromJson(json['staff'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AuthResponseToJson(_AuthResponse instance) =>
     <String, dynamic>{
       'accessToken': instance.accessToken,
+      'token': instance.token,
       'refreshToken': instance.refreshToken,
       'user': instance.user,
       'owner': instance.owner,
+      'staff': instance.staff,
     };
 
 _BaseApiResponse<T> _$BaseApiResponseFromJson<T>(

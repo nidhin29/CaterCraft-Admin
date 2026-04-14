@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:catering/Domain/Failure/failure.dart';
 import 'package:catering/Domain/Service/service_management_service.dart';
 import 'package:catering/Domain/Service/service_model.dart';
+import 'package:catering/Domain/TokenManager/token_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
@@ -12,8 +13,9 @@ import 'package:injectable/injectable.dart';
 @LazySingleton(as: ServiceManagementService)
 class ServiceManagementRepo implements ServiceManagementService {
   final Dio _dio;
+  final TokenService _tokenService;
 
-  ServiceManagementRepo(this._dio);
+  ServiceManagementRepo(this._dio, this._tokenService);
 
   @override
   Future<Either<MainFailure, Unit>> addService({
@@ -37,8 +39,11 @@ class ServiceManagementRepo implements ServiceManagementService {
         ),
       });
 
+      final role = await _tokenService.getRole() ?? 1;
+      final String base = role == 1 ? 'owner' : 'staff';
+
       final response = await _dio.post(
-        'api/v1/owner/add-service',
+        'api/v1/$base/add-service',
         data: formData,
       );
 
@@ -56,7 +61,9 @@ class ServiceManagementRepo implements ServiceManagementService {
   @override
   Future<Either<MainFailure, List<ServiceModel>>> viewServices() async {
     try {
-      final response = await _dio.get('api/v1/owner/view-services');
+      final role = await _tokenService.getRole() ?? 1;
+      final String base = role == 1 ? 'owner' : 'staff';
+      final response = await _dio.get('api/v1/$base/view-services');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final services = data.map((json) => ServiceModel.fromJson(json as Map<String, dynamic>)).toList();

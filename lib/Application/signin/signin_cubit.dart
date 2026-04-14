@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:catering/Domain/SignIn/sign_in_model/auth_response.dart';
@@ -7,7 +8,6 @@ import 'package:dartz/dartz.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:catering/Domain/Failure/failure.dart';
 import 'package:injectable/injectable.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 part 'signin_state.dart';
 part 'signin_cubit.freezed.dart';
@@ -23,7 +23,7 @@ class SigninCubit extends Cubit<SigninState> {
   Future<void> signIn(String email, String password, int userType) async {
     emit(state.copyWith(isLoading: true, isFailureOrSuccess: none()));
     final response = await _authService.login(email: email, password: password, userType: userType);
-    _handleAuthResponse(response, email, userType);
+    await _handleAuthResponse(response, email, userType);
   }
 
   Future<void> registerOwner({
@@ -31,10 +31,11 @@ class SigninCubit extends Cubit<SigninState> {
     required String email,
     required String password,
     required File license,
+    required File logo,
   }) async {
     emit(state.copyWith(isLoading: true, isFailureOrSuccess: none()));
-    final response = await _authService.registerOwner(name: name, email: email, password: password, license: license);
-    _handleAuthResponse(response, email, 1);
+    final response = await _authService.registerOwner(name: name, email: email, password: password, license: license, logo: logo);
+    await _handleAuthResponse(response, email, 1);
   }
 
   Future<void> googleLogin(String tokens) async {
@@ -63,14 +64,16 @@ class SigninCubit extends Cubit<SigninState> {
     required String companyName,
     required String tokenID,
     required File license,
+    required File logo,
   }) async {
     emit(state.copyWith(isLoading: true, isFailureOrSuccess: none()));
     final result = await _authService.googleRegister(
       companyName: companyName,
       tokenID: tokenID,
       license: license,
+      logo: logo,
     );
-    _handleAuthResponse(result, "", 1);
+    await _handleAuthResponse(result, "", 1);
   }
 
   Future<void> sendOtp(String email) async {
@@ -85,7 +88,7 @@ class SigninCubit extends Cubit<SigninState> {
   Future<void> verifyOtp(String email, String otp) async {
     emit(state.copyWith(isVerifyingOtp: true, isFailureOrSuccess: none()));
     final result = await _authService.verifyOtp(email: email, otp: otp);
-    _handleAuthResponse(result, email, 1);
+    await _handleAuthResponse(result, email, 1);
   }
 
   Future<void> _handleAuthResponse(Either<MainFailure, AuthResponse> response, String email, int userType) async {
@@ -94,20 +97,42 @@ class SigninCubit extends Cubit<SigninState> {
         emit(state.copyWith(isLoading: false, isVerifyingOtp: false, isFailureOrSuccess: some(left(failure))));
       },
       (success) async {
-        if (success.accessToken != null) {
-          await _tokenService.saveToken(success.accessToken!);
-          int role = userType;
-          try {
-            final Map<String, dynamic> decodedToken = JwtDecoder.decode(success.accessToken!);
-            role = decodedToken['role'] ?? userType;
-          } catch (e) {
-            // Role decoding failed, fall back to initial role
-          }
+        log('DEBUG: Starting _handleAuthResponse - userType: $userType');
+        final String? token = success.accessToken ?? success.token;
+        if (token != null) {
+          // Save role immediately to avoid any race conditions
+          final int role = userType;
           await _tokenService.saveRole(role);
+          log('DEBUG: Role saved successfully: $role');
+
+          await _tokenService.saveToken(token);
+          log('DEBUG: Token saved successfully');
+
+          log('DEBUG: Auth Response - userType: $userType, Final role: $role');
           
-          final finalEmail = success.user?.email ?? success.owner?.email ?? email;
+          final finalEmail = success.user?.email ?? success.owner?.email ?? success.staff?.email ?? email;
           if (finalEmail.isNotEmpty) {
             await _tokenService.saveEmail(finalEmail);
+          }
+
+          final finalCompany = success.owner?.companyName ?? success.user?.companyName ?? success.staff?.companyName;
+          if (finalCompany != null && finalCompany.isNotEmpty) {
+            await _tokenService.saveCompanyName(finalCompany);
+          }
+
+          final finalLogo = success.owner?.companyLogo ?? success.user?.companyLogo ?? success.staff?.companyLogo;
+          if (finalLogo != null) {
+            await _tokenService.saveCompanyLogo(finalLogo);
+          }
+
+          final finalStatus = success.owner?.verificationStatus ?? success.user?.verificationStatus ?? success.staff?.verificationStatus;
+          if (finalStatus != null) {
+            await _tokenService.saveVerificationStatus(finalStatus);
+          }
+
+          final finalUsername = success.owner?.username ?? success.user?.username ?? success.staff?.username;
+          if (finalUsername != null) {
+            await _tokenService.saveUsername(finalUsername);
           }
         }
         emit(state.copyWith(isLoading: false, isVerifyingOtp: false, isFailureOrSuccess: some(right(success))));
@@ -116,7 +141,8 @@ class SigninCubit extends Cubit<SigninState> {
   }
 
   Future<void> logout(String email) async {
-    await _authService.logout(email: email);
+    final role = await _tokenService.getRole() ?? 1; // Default to owner if role is missing
+    await _authService.logout(email: email, role: role);
     await _tokenService.clearAll();
   }
 }

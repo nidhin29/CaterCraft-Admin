@@ -10,13 +10,14 @@ abstract class SignInService {
     required int userType,
   });
 
-  Future<Either<MainFailure, Unit>> logout({required String email});
+  Future<Either<MainFailure, Unit>> logout({required String email, required int role});
 
   Future<Either<MainFailure, AuthResponse>> registerOwner({
     required String name,
     required String email,
     required String password,
     required File license,
+    required File logo,
   });
 
   Future<Either<MainFailure, AuthResponse>> googleLogin({
@@ -27,6 +28,7 @@ abstract class SignInService {
     required String companyName,
     required String tokenID,
     required File license,
+    required File logo,
   });
 
   Future<Either<MainFailure, Unit>> sendOtp({

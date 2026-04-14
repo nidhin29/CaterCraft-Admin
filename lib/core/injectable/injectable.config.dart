@@ -35,6 +35,7 @@ import 'package:catering/Infrastructure/TokenManager/token_repo.dart' as _i623;
 import 'package:dio/dio.dart' as _i361;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -46,9 +47,6 @@ extension GetItInjectableX on _i174.GetIt {
     final networkModule = _$NetworkModule();
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i717.SocketService>(() => _i717.SocketService());
-    gh.lazySingleton<_i430.OwnerService>(
-      () => _i699.OwnerRepo(gh<_i361.Dio>()),
-    );
     gh.lazySingleton<_i712.LoggedInService>(() => _i852.LoggedInRepo());
     gh.lazySingleton<_i872.ChatService>(() => _i686.ChatRepo(gh<_i361.Dio>()));
     gh.lazySingleton<_i346.BookingService>(
@@ -57,9 +55,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i675.SignInService>(
       () => _i545.SignInRepo(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i870.TokenService>(() => _i623.TokenRepo());
-    gh.lazySingleton<_i951.ServiceManagementService>(
-      () => _i501.ServiceManagementRepo(gh<_i361.Dio>()),
+    gh.lazySingleton<_i870.TokenService>(
+      () => _i623.TokenRepo(gh<_i460.SharedPreferences>()),
     );
     gh.factory<_i75.LoggedinCubit>(
       () => _i75.LoggedinCubit(
@@ -73,18 +70,27 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i324.StaffCubit>(
       () => _i324.StaffCubit(gh<_i346.BookingService>()),
     );
-    gh.factory<_i980.OwnerCubit>(
-      () => _i980.OwnerCubit(
-        gh<_i346.BookingService>(),
-        gh<_i951.ServiceManagementService>(),
-        gh<_i430.OwnerService>(),
-        gh<_i717.SocketService>(),
+    gh.lazySingleton<_i951.ServiceManagementService>(
+      () => _i501.ServiceManagementRepo(
+        gh<_i361.Dio>(),
+        gh<_i870.TokenService>(),
       ),
     );
     gh.factory<_i388.SigninCubit>(
       () => _i388.SigninCubit(
         gh<_i675.SignInService>(),
         gh<_i870.TokenService>(),
+      ),
+    );
+    gh.lazySingleton<_i430.OwnerService>(
+      () => _i699.OwnerRepo(gh<_i361.Dio>(), gh<_i870.TokenService>()),
+    );
+    gh.factory<_i980.OwnerCubit>(
+      () => _i980.OwnerCubit(
+        gh<_i346.BookingService>(),
+        gh<_i951.ServiceManagementService>(),
+        gh<_i430.OwnerService>(),
+        gh<_i717.SocketService>(),
       ),
     );
     return this;

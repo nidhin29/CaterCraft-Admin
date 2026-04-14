@@ -21,8 +21,9 @@ class SignInRepo implements SignInService {
     required int userType,
   }) async {
     try {
+      final String base = userType == 1 ? 'owner' : 'staff';
       final response = await _dio.post(
-        'api/v1/owner/login',
+        'api/v1/$base/login',
         data: {
           'email': email,
           'password': password,
@@ -30,7 +31,7 @@ class SignInRepo implements SignInService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final authResponse = AuthResponse.fromJson(response.data);
+        final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
         return Right(authResponse);
       } else {
         return const Left(MainFailure.serverFailure());
@@ -49,10 +50,11 @@ class SignInRepo implements SignInService {
   }
 
   @override
-  Future<Either<MainFailure, Unit>> logout({required String email}) async {
+  Future<Either<MainFailure, Unit>> logout({required String email, required int role}) async {
     try {
+      final String base = role == 1 ? 'owner' : 'staff';
       final response = await _dio.post(
-        'api/v1/owner/logout',
+        'api/v1/$base/logout',
         data: {'email': email},
       );
 
@@ -73,9 +75,10 @@ class SignInRepo implements SignInService {
     required String email,
     required String password,
     required File license,
+    required File logo,
   }) async {
     try {
-      final formData = FormData.fromMap({
+      final Map<String, dynamic> dataMap = {
         'name': name,
         'email': email,
         'password': password,
@@ -84,7 +87,14 @@ class SignInRepo implements SignInService {
           filename: license.path.split('/').last,
           contentType: MediaType('image', 'jpeg'),
         ),
-      });
+        'logo': await MultipartFile.fromFile(
+          logo.path,
+          filename: logo.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      };
+
+      final formData = FormData.fromMap(dataMap);
 
       final response = await _dio.post(
         'api/v1/owner/register-owner',
@@ -92,7 +102,7 @@ class SignInRepo implements SignInService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(AuthResponse.fromJson(response.data));
+        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
@@ -126,9 +136,10 @@ class SignInRepo implements SignInService {
     required String companyName,
     required String tokenID,
     required File license,
+    required File logo,
   }) async {
     try {
-      final formData = FormData.fromMap({
+      final Map<String, dynamic> dataMap = {
         'companyName': companyName,
         'tokenID': tokenID,
         'license': await MultipartFile.fromFile(
@@ -136,7 +147,14 @@ class SignInRepo implements SignInService {
           filename: license.path.split('/').last,
           contentType: MediaType('image', 'jpeg'),
         ),
-      });
+        'logo': await MultipartFile.fromFile(
+          logo.path,
+          filename: logo.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      };
+
+      final formData = FormData.fromMap(dataMap);
 
       final response = await _dio.post(
         'api/v1/owner/google-register',
@@ -144,7 +162,7 @@ class SignInRepo implements SignInService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(AuthResponse.fromJson(response.data));
+        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
