@@ -40,9 +40,37 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
     final tokenService = getIt<TokenService>();
     final email = await tokenService.getEmail();
     if (email != null && mounted) {
-      context.read<OwnerCubit>().fetchBookings();
-      context.read<OwnerCubit>().fetchServices();
-      context.read<OwnerCubit>().fetchStaff();
+      final cubit = context.read<OwnerCubit>();
+      
+      // Sync device ID (FCM token) and fetch details sequentially
+      await cubit.syncFCMToken();
+      await cubit.fetchDetails();
+      
+      // Parallel fetch for remaining data
+      Future.wait([
+        cubit.fetchBookings(),
+        cubit.fetchServices(),
+        cubit.fetchStaff(),
+        cubit.fetchRecentConversations(),
+      ]);
+
+      final user = cubit.state.ownerDetails.fold(() => null, (u) => u);
+      
+      cubit.setupSocket(email, user?.id, (msg) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(msg, style: const TextStyle(color: Colors.white)),
+              backgroundColor: AppTheme.ownerAccent,
+              behavior: SnackBarBehavior.floating,
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          );
+        }
+      });
     }
   }
 
@@ -53,7 +81,9 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       extendBody: true,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: AppTheme.premiumGradient)),
+          Container(
+            decoration: BoxDecoration(gradient: AppTheme.premiumGradient),
+          ),
           Positioned(
             top: -100,
             right: -100,
@@ -64,13 +94,13 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                 shape: BoxShape.circle,
                 color: AppTheme.ownerAccent.withOpacity(0.12),
               ),
-              child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100), child: Container()),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(),
+              ),
             ),
           ),
-          IndexedStack(
-            index: _currentIndex,
-            children: _tabs,
-          ),
+          IndexedStack(index: _currentIndex, children: _tabs),
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
@@ -84,7 +114,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
@@ -93,14 +123,36 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: AppTheme.ownerAccent,
             unselectedItemColor: Colors.white24,
-            selectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 0.5),
-            unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 10),
+            selectedLabelStyle: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              letterSpacing: 0.5,
+            ),
+            unselectedLabelStyle: GoogleFonts.outfit(
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+            ),
             items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: "HOME"),
-              BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: "ORDERS"),
-              BottomNavigationBarItem(icon: Icon(Icons.inventory_2_rounded), label: "SERVICES"),
-              BottomNavigationBarItem(icon: Icon(Icons.people_alt_rounded), label: "SQUAD"),
-              BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: "CHAT"),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_rounded),
+                label: "HOME",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long_rounded),
+                label: "ORDERS",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.inventory_2_rounded),
+                label: "SERVICES",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.people_alt_rounded),
+                label: "SQUAD",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_rounded),
+                label: "CHAT",
+              ),
             ],
           ),
         ),

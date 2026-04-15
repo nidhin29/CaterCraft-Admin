@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MessageModel {
 
-@JsonKey(name: '_id') String? get id; String get sender; String get message; String get timestamp; String? get roomId;
+@JsonKey(name: '_id') String? get id; String get senderId; String get senderType; String get receiverId; String get receiverType; String get message; String get room;@JsonKey(name: 'imageUrl') String? get imageUrl; bool get isEveryoneDeleted; List<String> get deletedBy;@JsonKey(name: 'createdAt') String? get createdAt;
 /// Create a copy of MessageModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $MessageModelCopyWith<MessageModel> get copyWith => _$MessageModelCopyWithImpl<M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageModel&&(identical(other.id, id) || other.id == id)&&(identical(other.sender, sender) || other.sender == sender)&&(identical(other.message, message) || other.message == message)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.roomId, roomId) || other.roomId == roomId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessageModel&&(identical(other.id, id) || other.id == id)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.senderType, senderType) || other.senderType == senderType)&&(identical(other.receiverId, receiverId) || other.receiverId == receiverId)&&(identical(other.receiverType, receiverType) || other.receiverType == receiverType)&&(identical(other.message, message) || other.message == message)&&(identical(other.room, room) || other.room == room)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isEveryoneDeleted, isEveryoneDeleted) || other.isEveryoneDeleted == isEveryoneDeleted)&&const DeepCollectionEquality().equals(other.deletedBy, deletedBy)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,sender,message,timestamp,roomId);
+int get hashCode => Object.hash(runtimeType,id,senderId,senderType,receiverId,receiverType,message,room,imageUrl,isEveryoneDeleted,const DeepCollectionEquality().hash(deletedBy),createdAt);
 
 @override
 String toString() {
-  return 'MessageModel(id: $id, sender: $sender, message: $message, timestamp: $timestamp, roomId: $roomId)';
+  return 'MessageModel(id: $id, senderId: $senderId, senderType: $senderType, receiverId: $receiverId, receiverType: $receiverType, message: $message, room: $room, imageUrl: $imageUrl, isEveryoneDeleted: $isEveryoneDeleted, deletedBy: $deletedBy, createdAt: $createdAt)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $MessageModelCopyWith<$Res>  {
   factory $MessageModelCopyWith(MessageModel value, $Res Function(MessageModel) _then) = _$MessageModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: '_id') String? id, String sender, String message, String timestamp, String? roomId
+@JsonKey(name: '_id') String? id, String senderId, String senderType, String receiverId, String receiverType, String message, String room,@JsonKey(name: 'imageUrl') String? imageUrl, bool isEveryoneDeleted, List<String> deletedBy,@JsonKey(name: 'createdAt') String? createdAt
 });
 
 
@@ -66,13 +66,19 @@ class _$MessageModelCopyWithImpl<$Res>
 
 /// Create a copy of MessageModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? sender = null,Object? message = null,Object? timestamp = null,Object? roomId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? senderId = null,Object? senderType = null,Object? receiverId = null,Object? receiverType = null,Object? message = null,Object? room = null,Object? imageUrl = freezed,Object? isEveryoneDeleted = null,Object? deletedBy = null,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,sender: null == sender ? _self.sender : sender // ignore: cast_nullable_to_non_nullable
+as String?,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
+as String,senderType: null == senderType ? _self.senderType : senderType // ignore: cast_nullable_to_non_nullable
+as String,receiverId: null == receiverId ? _self.receiverId : receiverId // ignore: cast_nullable_to_non_nullable
+as String,receiverType: null == receiverType ? _self.receiverType : receiverType // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as String,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String,room: null == room ? _self.room : room // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,isEveryoneDeleted: null == isEveryoneDeleted ? _self.isEveryoneDeleted : isEveryoneDeleted // ignore: cast_nullable_to_non_nullable
+as bool,deletedBy: null == deletedBy ? _self.deletedBy : deletedBy // ignore: cast_nullable_to_non_nullable
+as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -84,14 +90,26 @@ as String?,
 @JsonSerializable()
 
 class _MessageModel implements MessageModel {
-  const _MessageModel({@JsonKey(name: '_id') this.id, required this.sender, required this.message, required this.timestamp, this.roomId});
+  const _MessageModel({@JsonKey(name: '_id') this.id, required this.senderId, required this.senderType, required this.receiverId, required this.receiverType, required this.message, required this.room, @JsonKey(name: 'imageUrl') this.imageUrl, this.isEveryoneDeleted = false, final  List<String> deletedBy = const [], @JsonKey(name: 'createdAt') this.createdAt}): _deletedBy = deletedBy;
   factory _MessageModel.fromJson(Map<String, dynamic> json) => _$MessageModelFromJson(json);
 
 @override@JsonKey(name: '_id') final  String? id;
-@override final  String sender;
+@override final  String senderId;
+@override final  String senderType;
+@override final  String receiverId;
+@override final  String receiverType;
 @override final  String message;
-@override final  String timestamp;
-@override final  String? roomId;
+@override final  String room;
+@override@JsonKey(name: 'imageUrl') final  String? imageUrl;
+@override@JsonKey() final  bool isEveryoneDeleted;
+ final  List<String> _deletedBy;
+@override@JsonKey() List<String> get deletedBy {
+  if (_deletedBy is EqualUnmodifiableListView) return _deletedBy;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_deletedBy);
+}
+
+@override@JsonKey(name: 'createdAt') final  String? createdAt;
 
 /// Create a copy of MessageModel
 /// with the given fields replaced by the non-null parameter values.
@@ -106,16 +124,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageModel&&(identical(other.id, id) || other.id == id)&&(identical(other.sender, sender) || other.sender == sender)&&(identical(other.message, message) || other.message == message)&&(identical(other.timestamp, timestamp) || other.timestamp == timestamp)&&(identical(other.roomId, roomId) || other.roomId == roomId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessageModel&&(identical(other.id, id) || other.id == id)&&(identical(other.senderId, senderId) || other.senderId == senderId)&&(identical(other.senderType, senderType) || other.senderType == senderType)&&(identical(other.receiverId, receiverId) || other.receiverId == receiverId)&&(identical(other.receiverType, receiverType) || other.receiverType == receiverType)&&(identical(other.message, message) || other.message == message)&&(identical(other.room, room) || other.room == room)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.isEveryoneDeleted, isEveryoneDeleted) || other.isEveryoneDeleted == isEveryoneDeleted)&&const DeepCollectionEquality().equals(other._deletedBy, _deletedBy)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,sender,message,timestamp,roomId);
+int get hashCode => Object.hash(runtimeType,id,senderId,senderType,receiverId,receiverType,message,room,imageUrl,isEveryoneDeleted,const DeepCollectionEquality().hash(_deletedBy),createdAt);
 
 @override
 String toString() {
-  return 'MessageModel(id: $id, sender: $sender, message: $message, timestamp: $timestamp, roomId: $roomId)';
+  return 'MessageModel(id: $id, senderId: $senderId, senderType: $senderType, receiverId: $receiverId, receiverType: $receiverType, message: $message, room: $room, imageUrl: $imageUrl, isEveryoneDeleted: $isEveryoneDeleted, deletedBy: $deletedBy, createdAt: $createdAt)';
 }
 
 
@@ -126,7 +144,7 @@ abstract mixin class _$MessageModelCopyWith<$Res> implements $MessageModelCopyWi
   factory _$MessageModelCopyWith(_MessageModel value, $Res Function(_MessageModel) _then) = __$MessageModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: '_id') String? id, String sender, String message, String timestamp, String? roomId
+@JsonKey(name: '_id') String? id, String senderId, String senderType, String receiverId, String receiverType, String message, String room,@JsonKey(name: 'imageUrl') String? imageUrl, bool isEveryoneDeleted, List<String> deletedBy,@JsonKey(name: 'createdAt') String? createdAt
 });
 
 
@@ -143,13 +161,19 @@ class __$MessageModelCopyWithImpl<$Res>
 
 /// Create a copy of MessageModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? sender = null,Object? message = null,Object? timestamp = null,Object? roomId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? senderId = null,Object? senderType = null,Object? receiverId = null,Object? receiverType = null,Object? message = null,Object? room = null,Object? imageUrl = freezed,Object? isEveryoneDeleted = null,Object? deletedBy = null,Object? createdAt = freezed,}) {
   return _then(_MessageModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String?,sender: null == sender ? _self.sender : sender // ignore: cast_nullable_to_non_nullable
+as String?,senderId: null == senderId ? _self.senderId : senderId // ignore: cast_nullable_to_non_nullable
+as String,senderType: null == senderType ? _self.senderType : senderType // ignore: cast_nullable_to_non_nullable
+as String,receiverId: null == receiverId ? _self.receiverId : receiverId // ignore: cast_nullable_to_non_nullable
+as String,receiverType: null == receiverType ? _self.receiverType : receiverType // ignore: cast_nullable_to_non_nullable
 as String,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,timestamp: null == timestamp ? _self.timestamp : timestamp // ignore: cast_nullable_to_non_nullable
-as String,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String,room: null == room ? _self.room : room // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,isEveryoneDeleted: null == isEveryoneDeleted ? _self.isEveryoneDeleted : isEveryoneDeleted // ignore: cast_nullable_to_non_nullable
+as bool,deletedBy: null == deletedBy ? _self._deletedBy : deletedBy // ignore: cast_nullable_to_non_nullable
+as List<String>,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

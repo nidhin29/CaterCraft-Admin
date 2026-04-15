@@ -12,12 +12,14 @@ abstract class OwnerService {
     File? logo,
     String? fullName,
     File? profileImage,
+    String? fcmToken,
   });
   Future<Either<MainFailure, Unit>> addStaff({
     required String fullName,
     required String email,
     required String password,
     required String designation,
+    String? fcmToken,
   });
   Future<Either<MainFailure, Unit>> updatePassword({required String oldPassword, required String newPassword});
 }

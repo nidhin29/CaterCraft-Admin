@@ -20,10 +20,7 @@ class StaffHomeScreen extends StatefulWidget {
 class _StaffHomeScreenState extends State<StaffHomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _tabs = [
-    const MissionsTab(),
-    const ChatListTab(),
-  ];
+  final List<Widget> _tabs = [const MissionsTab(), const ChatListTab()];
 
   @override
   void initState() {
@@ -35,9 +32,18 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
     final tokenService = getIt<TokenService>();
     final email = await tokenService.getEmail();
     if (email != null && mounted) {
-      context.read<StaffCubit>().fetchAssignedBookings();
-      // Ensure owner details are fetched so ownerInfo is populated for chat
-      context.read<OwnerCubit>().fetchDetails(); 
+      final ownerCubit = context.read<OwnerCubit>();
+      final staffCubit = context.read<StaffCubit>();
+
+      // Fetch shared context data
+      staffCubit.fetchAssignedBookings();
+      
+      // Sync device ID (FCM token) and fetch details sequentially
+      await ownerCubit.syncFCMToken();
+      await ownerCubit.fetchDetails();
+      
+      final user = ownerCubit.state.ownerDetails.fold(() => null, (u) => u);
+      ownerCubit.setupSocket(email, user?.id);
     }
   }
 
@@ -48,8 +54,10 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       extendBody: true,
       body: Stack(
         children: [
-          Container(decoration: BoxDecoration(gradient: AppTheme.premiumGradient)),
-          
+          Container(
+            decoration: BoxDecoration(gradient: AppTheme.premiumGradient),
+          ),
+
           // Subtle Aura Glows
           Positioned(
             bottom: -50,
@@ -61,14 +69,14 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
                 shape: BoxShape.circle,
                 color: AppTheme.staffAccent.withOpacity(0.1),
               ),
-              child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80), child: Container()),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+                child: Container(),
+              ),
             ),
           ),
 
-          IndexedStack(
-            index: _currentIndex,
-            children: _tabs,
-          ),
+          IndexedStack(index: _currentIndex, children: _tabs),
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
@@ -91,11 +99,24 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: AppTheme.staffAccent,
             unselectedItemColor: Colors.white24,
-            selectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 0.5),
-            unselectedLabelStyle: GoogleFonts.outfit(fontWeight: FontWeight.w500, fontSize: 10),
+            selectedLabelStyle: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              letterSpacing: 0.5,
+            ),
+            unselectedLabelStyle: GoogleFonts.outfit(
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+            ),
             items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.assignment_ind_rounded), label: "MISSIONS"),
-              BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded), label: "INBOX"),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_ind_rounded),
+                label: "MISSIONS",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_rounded),
+                label: "INBOX",
+              ),
             ],
           ),
         ),

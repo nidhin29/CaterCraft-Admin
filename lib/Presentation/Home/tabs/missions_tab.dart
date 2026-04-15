@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:catering/Application/Staff/staff_cubit.dart';
 import 'package:catering/Presentation/Home/notifications_screen.dart';
 import 'package:catering/Presentation/Home/profile.dart';
@@ -26,7 +25,11 @@ class MissionsTab extends StatelessWidget {
                 const SizedBox(height: 32),
                 Row(
                   children: [
-                    Icon(Icons.assignment_rounded, color: AppTheme.staffAccent.withOpacity(0.7), size: 18),
+                    Icon(
+                      Icons.assignment_rounded,
+                      color: AppTheme.staffAccent.withOpacity(0.7),
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       "TODAY'S MISSIONS",
@@ -57,8 +60,15 @@ class MissionsTab extends StatelessWidget {
       elevation: 0,
       automaticallyImplyLeading: false,
       leading: IconButton(
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen())),
-        icon: const Icon(Icons.account_circle_outlined, color: Colors.white70, size: 28),
+        onPressed:
+            () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            ),
+        icon: const Icon(
+          Icons.account_circle_outlined,
+          color: Colors.white70,
+          size: 28,
+        ),
       ),
       title: Text(
         "OPERATIONS",
@@ -71,8 +81,17 @@ class MissionsTab extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const NotificationsScreen())),
-          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white70, size: 28),
+          onPressed:
+              () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const NotificationsScreen(),
+                ),
+              ),
+          icon: const Icon(
+            Icons.notifications_none_rounded,
+            color: Colors.white70,
+            size: 28,
+          ),
         ),
         const SizedBox(width: 8),
       ],
@@ -110,7 +129,11 @@ class MissionsTab extends StatelessWidget {
     return BlocBuilder<StaffCubit, StaffState>(
       builder: (context, state) {
         if (state.isLoading) {
-          return const SliverFillRemaining(child: Center(child: CircularProgressIndicator(color: AppTheme.staffAccent)));
+          return const SliverFillRemaining(
+            child: Center(
+              child: CircularProgressIndicator(color: AppTheme.staffAccent),
+            ),
+          );
         }
         if (state.bookings.isEmpty) {
           return SliverFillRemaining(
@@ -118,9 +141,16 @@ class MissionsTab extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.task_alt_rounded, size: 64, color: Colors.white.withOpacity(0.1)),
+                  Icon(
+                    Icons.task_alt_rounded,
+                    size: 64,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
                   const SizedBox(height: 16),
-                  const Text("All clear! No tasks today.", style: TextStyle(color: Colors.white38)),
+                  const Text(
+                    "All clear! No tasks today.",
+                    style: TextStyle(color: Colors.white38),
+                  ),
                 ],
               ),
             ),
@@ -130,7 +160,8 @@ class MissionsTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => _eventTaskCard(context, state.bookings[index]),
+              (context, index) =>
+                  _eventTaskCard(context, state.bookings[index]),
               childCount: state.bookings.length,
             ),
           ),
@@ -140,8 +171,14 @@ class MissionsTab extends StatelessWidget {
   }
 
   Widget _eventTaskCard(BuildContext context, dynamic booking) {
-    final completedTasks = context.watch<StaffCubit>().state.completedTasks[booking.id] ?? [];
-    final allTasks = ["Kitchen Prep", "Venue Setup", "Service", "Standard Cleanup"];
+    final completedTasks =
+        context.watch<StaffCubit>().state.completedTasks[booking.id] ?? [];
+    final allTasks = [
+      "Kitchen Prep",
+      "Venue Setup",
+      "Service",
+      "Standard Cleanup",
+    ];
     final progress = completedTasks.length / allTasks.length;
 
     return Container(
@@ -154,7 +191,11 @@ class MissionsTab extends StatelessWidget {
           tilePadding: const EdgeInsets.all(20),
           title: Text(
             booking.service.name,
-            style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+            style: GoogleFonts.outfit(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.white,
+            ),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,16 +207,32 @@ class MissionsTab extends StatelessWidget {
               const SizedBox(height: 20),
               Stack(
                 children: [
-                  Container(height: 6, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10))),
+                  Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeOut,
                     height: 6,
                     width: MediaQuery.of(context).size.width * 0.5 * progress,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [AppTheme.staffAccent, AppTheme.staffAccent.withOpacity(0.5)]),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.staffAccent,
+                          AppTheme.staffAccent.withOpacity(0.5),
+                        ],
+                      ),
                       borderRadius: BorderRadius.circular(10),
-                      boxShadow: [BoxShadow(color: AppTheme.staffAccent.withOpacity(0.3), blurRadius: 8)],
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.staffAccent.withOpacity(0.3),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -187,10 +244,11 @@ class MissionsTab extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Column(
-                children: allTasks.map((task) {
-                  final isDone = completedTasks.contains(task);
-                  return _taskCheckbox(context, booking.id!, task, isDone);
-                }).toList(),
+                children:
+                    allTasks.map((task) {
+                      final isDone = completedTasks.contains(task);
+                      return _taskCheckbox(context, booking.id!, task, isDone);
+                    }).toList(),
               ),
             ),
           ],
@@ -204,7 +262,16 @@ class MissionsTab extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: AppTheme.staffAccent.withOpacity(0.6)),
         const SizedBox(width: 8),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white54, overflow: TextOverflow.ellipsis))),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white54,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -213,18 +280,26 @@ class MissionsTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: (complete ? Colors.greenAccent : AppTheme.staffAccent).withOpacity(0.1),
+        color: (complete ? Colors.greenAccent : AppTheme.staffAccent)
+            .withOpacity(0.1),
         shape: BoxShape.circle,
       ),
       child: Icon(
-        complete ? Icons.check_circle_rounded : Icons.keyboard_arrow_down_rounded,
+        complete
+            ? Icons.check_circle_rounded
+            : Icons.keyboard_arrow_down_rounded,
         color: complete ? Colors.greenAccent : AppTheme.staffAccent,
         size: 20,
       ),
     );
   }
 
-  Widget _taskCheckbox(BuildContext context, String bookingId, String task, bool isDone) {
+  Widget _taskCheckbox(
+    BuildContext context,
+    String bookingId,
+    String task,
+    bool isDone,
+  ) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -241,9 +316,15 @@ class MissionsTab extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isDone ? AppTheme.staffAccent : Colors.transparent,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: isDone ? AppTheme.staffAccent : Colors.white24, width: 2),
+                  border: Border.all(
+                    color: isDone ? AppTheme.staffAccent : Colors.white24,
+                    width: 2,
+                  ),
                 ),
-                child: isDone ? const Icon(Icons.check, size: 16, color: Colors.black) : null,
+                child:
+                    isDone
+                        ? const Icon(Icons.check, size: 16, color: Colors.black)
+                        : null,
               ),
               const SizedBox(width: 16),
               Expanded(

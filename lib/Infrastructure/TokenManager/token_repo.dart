@@ -15,7 +15,6 @@ class TokenRepo implements TokenService {
   TokenRepo(this._prefs) {
     // Initial sync from prefs
     _cachedRole = _prefs.getInt(_roleKey);
-    log('DEBUG: TokenRepo Initialized - Initial Role Cache: $_cachedRole');
   }
 
   static const String _tokenKey = 'auth_token';
@@ -53,14 +52,12 @@ class TokenRepo implements TokenService {
   Future<int?> getRole() async {
     // Priority 1: In-memory cache
     if (_cachedRole != null) {
-      log('DEBUG: TokenRepo.getRole (Cache Hit) - Role: $_cachedRole');
       return _cachedRole;
     }
     
     // Priority 2: Persistent storage
     final role = _prefs.getInt(_roleKey);
     _cachedRole = role; // Re-sync cache
-    log('DEBUG: TokenRepo.getRole (Storage Sync) - Read role: $role');
     return role;
   }
 

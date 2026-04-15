@@ -244,6 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     : Image.network(
                                         "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png",
                                         height: 20,
+                                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: Colors.white, size: 24),
                                       ),
                                   label: state.isLoading
                                     ? const SizedBox(

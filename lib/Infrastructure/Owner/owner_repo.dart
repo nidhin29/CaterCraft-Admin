@@ -38,23 +38,15 @@ class OwnerRepo implements OwnerService {
   @override
   Future<Either<MainFailure, UserModel>> getDetails() async {
     try {
-      final roleStr = await _tokenService.getRole();
-      
-      log('🚨 ROLE CHECK 🚨');
-      log('🚨 Stored Role: $roleStr');
+      int? role = await _tokenService.getRole();
       
       // CRITICAL: Determine base strictly. If role is null, we might be in a race condition.
-      // We will try one more time to read after a tiny delay if null.
-      int? role = roleStr;
       if (role == null) {
         await Future.delayed(const Duration(milliseconds: 100));
         role = await _tokenService.getRole();
-        log('🚨 Role after retry: $role');
       }
 
       final String url = (role == 2) ? 'api/v1/staff/get-profile' : 'api/v1/owner/get-details';
-      
-      log('🚨 Final Routing -> URL: $url');
       
       final response = await _dio.get(url);
       if (response.statusCode == 200) {
@@ -78,6 +70,7 @@ class OwnerRepo implements OwnerService {
     File? logo,
     String? fullName,
     File? profileImage,
+    String? fcmToken,
   }) async {
     try {
       final role = await _tokenService.getRole() ?? 1;
@@ -86,6 +79,7 @@ class OwnerRepo implements OwnerService {
       final Map<String, dynamic> dataMap = {};
       if (companyName != null) dataMap['companyName'] = companyName;
       if (fullName != null) dataMap['fullName'] = fullName;
+      if (fcmToken != null) dataMap['fcmToken'] = fcmToken;
       
       if (logo != null) {
         dataMap['logo'] = await MultipartFile.fromFile(
@@ -122,19 +116,23 @@ class OwnerRepo implements OwnerService {
     required String email,
     required String password,
     required String designation,
+    String? fcmToken,
   }) async {
     try {
       final role = await _tokenService.getRole() ?? 1;
       final String base = (role == 2) ? 'staff' : 'owner';
       
+      final Map<String, dynamic> data = {
+        'fullName': fullName,
+        'email': email,
+        'password': password,
+        'designation': designation,
+      };
+      if (fcmToken != null) data['fcmToken'] = fcmToken;
+      
       final response = await _dio.post(
         'api/v1/$base/add-staff',
-        data: {
-          'fullName': fullName,
-          'email': email,
-          'password': password,
-          'designation': designation,
-        },
+        data: data,
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {

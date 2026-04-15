@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:catering/Application/booking/booking_cubit.dart' as _i767;
+import 'package:catering/Application/Chat/chat_cubit.dart' as _i344;
 import 'package:catering/Application/loggedin/loggedin_cubit.dart' as _i75;
 import 'package:catering/Application/Owner/owner_cubit.dart' as _i980;
 import 'package:catering/Application/signin/signin_cubit.dart' as _i388;
@@ -25,6 +26,7 @@ import 'package:catering/Domain/SignIn/sign_in_service.dart' as _i675;
 import 'package:catering/Domain/TokenManager/token_service.dart' as _i870;
 import 'package:catering/Infrastructure/booking/booking_repo.dart' as _i284;
 import 'package:catering/Infrastructure/Chat/chat_repo.dart' as _i686;
+import 'package:catering/Infrastructure/Core/injectable_module.dart' as _i873;
 import 'package:catering/Infrastructure/Core/socket_service.dart' as _i717;
 import 'package:catering/Infrastructure/LoggedIn/logged_in_repo.dart' as _i852;
 import 'package:catering/Infrastructure/Owner/owner_repo.dart' as _i699;
@@ -39,12 +41,17 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
+  }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
+    final injectableModule = _$InjectableModule();
     final networkModule = _$NetworkModule();
+    await gh.factoryAsync<_i460.SharedPreferences>(
+      () => injectableModule.prefs,
+      preResolve: true,
+    );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i717.SocketService>(() => _i717.SocketService());
     gh.lazySingleton<_i712.LoggedInService>(() => _i852.LoggedInRepo());
@@ -70,6 +77,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i324.StaffCubit>(
       () => _i324.StaffCubit(gh<_i346.BookingService>()),
     );
+    gh.factory<_i344.ChatCubit>(
+      () => _i344.ChatCubit(gh<_i872.ChatService>(), gh<_i717.SocketService>()),
+    );
     gh.lazySingleton<_i951.ServiceManagementService>(
       () => _i501.ServiceManagementRepo(
         gh<_i361.Dio>(),
@@ -91,10 +101,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i951.ServiceManagementService>(),
         gh<_i430.OwnerService>(),
         gh<_i717.SocketService>(),
+        gh<_i872.ChatService>(),
       ),
     );
     return this;
   }
 }
+
+class _$InjectableModule extends _i873.InjectableModule {}
 
 class _$NetworkModule extends _i565.NetworkModule {}

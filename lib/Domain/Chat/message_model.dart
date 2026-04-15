@@ -7,10 +7,16 @@ part 'message_model.g.dart';
 abstract class MessageModel with _$MessageModel {
   const factory MessageModel({
     @JsonKey(name: '_id') String? id,
-    required String sender,
+    required String senderId,
+    required String senderType,
+    required String receiverId,
+    required String receiverType,
     required String message,
-    required String timestamp,
-    String? roomId,
+    required String room,
+    @JsonKey(name: 'imageUrl') String? imageUrl,
+    @Default(false) bool isEveryoneDeleted,
+    @Default([]) List<String> deletedBy,
+    @JsonKey(name: 'createdAt') String? createdAt,
   }) = _MessageModel;
 
   factory MessageModel.fromJson(Map<String, dynamic> json) => _$MessageModelFromJson(json);
