@@ -12,8 +12,11 @@ abstract class ConversationModel with _$ConversationModel {
     required String otherUserName,
     String? otherUserImage,
     required String otherUserType,
+    String? otherUserPublicKey,
     @Default(false) bool isOnline,
     @Default(0) int unreadCount,
+    @Default(false) bool isEncrypted,
+    String? encryptionNonce,
   }) = _ConversationModel;
 
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
@@ -27,8 +30,11 @@ abstract class ConversationModel with _$ConversationModel {
       otherUserName: otherUser['name'] ?? 'Unknown User',
       otherUserImage: otherUser['image'],
       otherUserType: otherUser['type'] ?? 'Staff',
+      otherUserPublicKey: otherUser['publicKey'],
       isOnline: json['isOnline'] ?? false,
       unreadCount: json['unreadCount'] ?? 0,
+      isEncrypted: json['isEncrypted'] ?? false,
+      encryptionNonce: json['encryptionNonce'],
     );
   }
 }

@@ -6,13 +6,15 @@ part 'service_model.g.dart';
 @freezed
 abstract class ServiceModel with _$ServiceModel {
   const factory ServiceModel({
-    @JsonKey(name: 'id') String? id,
-    @JsonKey(name: 'name') required String name,
-    @JsonKey(name: 'rate') required double rate,
-    @JsonKey(name: 'duration') required String duration,
-    @JsonKey(name: 'description') required String description,
-    @JsonKey(name: 'image') String? image,
+    @JsonKey(name: '_id') String? id,
+    @JsonKey(name: 'service_name') required String name,
+    @JsonKey(name: 'rate') required num rate,
+    @JsonKey(name: 'duration') String? duration,
+    @JsonKey(name: 'description') String? description,
+    @JsonKey(name: 'imageUrl') String? image,
+    @JsonKey(name: 'service_group') String? serviceGroup,
   }) = _ServiceModel;
 
-  factory ServiceModel.fromJson(Map<String, dynamic> json) => _$ServiceModelFromJson(json);
+  factory ServiceModel.fromJson(Map<String, dynamic> json) =>
+      _$ServiceModelFromJson(json);
 }

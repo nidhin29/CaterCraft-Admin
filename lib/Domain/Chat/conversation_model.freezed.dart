@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ConversationModel {
 
- String get roomId; String get lastMessage; String get lastMessageTime; String get otherUserId; String get otherUserName; String? get otherUserImage; String get otherUserType; bool get isOnline; int get unreadCount;
+ String get roomId; String get lastMessage; String get lastMessageTime; String get otherUserId; String get otherUserName; String? get otherUserImage; String get otherUserType; String? get otherUserPublicKey; bool get isOnline; int get unreadCount; bool get isEncrypted; String? get encryptionNonce;
 /// Create a copy of ConversationModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $ConversationModelCopyWith<ConversationModel> get copyWith => _$ConversationMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversationModel&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.lastMessageTime, lastMessageTime) || other.lastMessageTime == lastMessageTime)&&(identical(other.otherUserId, otherUserId) || other.otherUserId == otherUserId)&&(identical(other.otherUserName, otherUserName) || other.otherUserName == otherUserName)&&(identical(other.otherUserImage, otherUserImage) || other.otherUserImage == otherUserImage)&&(identical(other.otherUserType, otherUserType) || other.otherUserType == otherUserType)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConversationModel&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.lastMessageTime, lastMessageTime) || other.lastMessageTime == lastMessageTime)&&(identical(other.otherUserId, otherUserId) || other.otherUserId == otherUserId)&&(identical(other.otherUserName, otherUserName) || other.otherUserName == otherUserName)&&(identical(other.otherUserImage, otherUserImage) || other.otherUserImage == otherUserImage)&&(identical(other.otherUserType, otherUserType) || other.otherUserType == otherUserType)&&(identical(other.otherUserPublicKey, otherUserPublicKey) || other.otherUserPublicKey == otherUserPublicKey)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.isEncrypted, isEncrypted) || other.isEncrypted == isEncrypted)&&(identical(other.encryptionNonce, encryptionNonce) || other.encryptionNonce == encryptionNonce));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,roomId,lastMessage,lastMessageTime,otherUserId,otherUserName,otherUserImage,otherUserType,isOnline,unreadCount);
+int get hashCode => Object.hash(runtimeType,roomId,lastMessage,lastMessageTime,otherUserId,otherUserName,otherUserImage,otherUserType,otherUserPublicKey,isOnline,unreadCount,isEncrypted,encryptionNonce);
 
 @override
 String toString() {
-  return 'ConversationModel(roomId: $roomId, lastMessage: $lastMessage, lastMessageTime: $lastMessageTime, otherUserId: $otherUserId, otherUserName: $otherUserName, otherUserImage: $otherUserImage, otherUserType: $otherUserType, isOnline: $isOnline, unreadCount: $unreadCount)';
+  return 'ConversationModel(roomId: $roomId, lastMessage: $lastMessage, lastMessageTime: $lastMessageTime, otherUserId: $otherUserId, otherUserName: $otherUserName, otherUserImage: $otherUserImage, otherUserType: $otherUserType, otherUserPublicKey: $otherUserPublicKey, isOnline: $isOnline, unreadCount: $unreadCount, isEncrypted: $isEncrypted, encryptionNonce: $encryptionNonce)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $ConversationModelCopyWith<$Res>  {
   factory $ConversationModelCopyWith(ConversationModel value, $Res Function(ConversationModel) _then) = _$ConversationModelCopyWithImpl;
 @useResult
 $Res call({
- String roomId, String lastMessage, String lastMessageTime, String otherUserId, String otherUserName, String? otherUserImage, String otherUserType, bool isOnline, int unreadCount
+ String roomId, String lastMessage, String lastMessageTime, String otherUserId, String otherUserName, String? otherUserImage, String otherUserType, String? otherUserPublicKey, bool isOnline, int unreadCount, bool isEncrypted, String? encryptionNonce
 });
 
 
@@ -63,7 +63,7 @@ class _$ConversationModelCopyWithImpl<$Res>
 
 /// Create a copy of ConversationModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? roomId = null,Object? lastMessage = null,Object? lastMessageTime = null,Object? otherUserId = null,Object? otherUserName = null,Object? otherUserImage = freezed,Object? otherUserType = null,Object? isOnline = null,Object? unreadCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? roomId = null,Object? lastMessage = null,Object? lastMessageTime = null,Object? otherUserId = null,Object? otherUserName = null,Object? otherUserImage = freezed,Object? otherUserType = null,Object? otherUserPublicKey = freezed,Object? isOnline = null,Object? unreadCount = null,Object? isEncrypted = null,Object? encryptionNonce = freezed,}) {
   return _then(_self.copyWith(
 roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
 as String,lastMessage: null == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
@@ -72,9 +72,12 @@ as String,otherUserId: null == otherUserId ? _self.otherUserId : otherUserId // 
 as String,otherUserName: null == otherUserName ? _self.otherUserName : otherUserName // ignore: cast_nullable_to_non_nullable
 as String,otherUserImage: freezed == otherUserImage ? _self.otherUserImage : otherUserImage // ignore: cast_nullable_to_non_nullable
 as String?,otherUserType: null == otherUserType ? _self.otherUserType : otherUserType // ignore: cast_nullable_to_non_nullable
-as String,isOnline: null == isOnline ? _self.isOnline : isOnline // ignore: cast_nullable_to_non_nullable
+as String,otherUserPublicKey: freezed == otherUserPublicKey ? _self.otherUserPublicKey : otherUserPublicKey // ignore: cast_nullable_to_non_nullable
+as String?,isOnline: null == isOnline ? _self.isOnline : isOnline // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,isEncrypted: null == isEncrypted ? _self.isEncrypted : isEncrypted // ignore: cast_nullable_to_non_nullable
+as bool,encryptionNonce: freezed == encryptionNonce ? _self.encryptionNonce : encryptionNonce // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -85,7 +88,7 @@ as int,
 
 
 class _ConversationModel implements ConversationModel {
-  const _ConversationModel({required this.roomId, required this.lastMessage, required this.lastMessageTime, required this.otherUserId, required this.otherUserName, this.otherUserImage, required this.otherUserType, this.isOnline = false, this.unreadCount = 0});
+  const _ConversationModel({required this.roomId, required this.lastMessage, required this.lastMessageTime, required this.otherUserId, required this.otherUserName, this.otherUserImage, required this.otherUserType, this.otherUserPublicKey, this.isOnline = false, this.unreadCount = 0, this.isEncrypted = false, this.encryptionNonce});
   
 
 @override final  String roomId;
@@ -95,8 +98,11 @@ class _ConversationModel implements ConversationModel {
 @override final  String otherUserName;
 @override final  String? otherUserImage;
 @override final  String otherUserType;
+@override final  String? otherUserPublicKey;
 @override@JsonKey() final  bool isOnline;
 @override@JsonKey() final  int unreadCount;
+@override@JsonKey() final  bool isEncrypted;
+@override final  String? encryptionNonce;
 
 /// Create a copy of ConversationModel
 /// with the given fields replaced by the non-null parameter values.
@@ -108,16 +114,16 @@ _$ConversationModelCopyWith<_ConversationModel> get copyWith => __$ConversationM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConversationModel&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.lastMessageTime, lastMessageTime) || other.lastMessageTime == lastMessageTime)&&(identical(other.otherUserId, otherUserId) || other.otherUserId == otherUserId)&&(identical(other.otherUserName, otherUserName) || other.otherUserName == otherUserName)&&(identical(other.otherUserImage, otherUserImage) || other.otherUserImage == otherUserImage)&&(identical(other.otherUserType, otherUserType) || other.otherUserType == otherUserType)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConversationModel&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.lastMessageTime, lastMessageTime) || other.lastMessageTime == lastMessageTime)&&(identical(other.otherUserId, otherUserId) || other.otherUserId == otherUserId)&&(identical(other.otherUserName, otherUserName) || other.otherUserName == otherUserName)&&(identical(other.otherUserImage, otherUserImage) || other.otherUserImage == otherUserImage)&&(identical(other.otherUserType, otherUserType) || other.otherUserType == otherUserType)&&(identical(other.otherUserPublicKey, otherUserPublicKey) || other.otherUserPublicKey == otherUserPublicKey)&&(identical(other.isOnline, isOnline) || other.isOnline == isOnline)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.isEncrypted, isEncrypted) || other.isEncrypted == isEncrypted)&&(identical(other.encryptionNonce, encryptionNonce) || other.encryptionNonce == encryptionNonce));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,roomId,lastMessage,lastMessageTime,otherUserId,otherUserName,otherUserImage,otherUserType,isOnline,unreadCount);
+int get hashCode => Object.hash(runtimeType,roomId,lastMessage,lastMessageTime,otherUserId,otherUserName,otherUserImage,otherUserType,otherUserPublicKey,isOnline,unreadCount,isEncrypted,encryptionNonce);
 
 @override
 String toString() {
-  return 'ConversationModel(roomId: $roomId, lastMessage: $lastMessage, lastMessageTime: $lastMessageTime, otherUserId: $otherUserId, otherUserName: $otherUserName, otherUserImage: $otherUserImage, otherUserType: $otherUserType, isOnline: $isOnline, unreadCount: $unreadCount)';
+  return 'ConversationModel(roomId: $roomId, lastMessage: $lastMessage, lastMessageTime: $lastMessageTime, otherUserId: $otherUserId, otherUserName: $otherUserName, otherUserImage: $otherUserImage, otherUserType: $otherUserType, otherUserPublicKey: $otherUserPublicKey, isOnline: $isOnline, unreadCount: $unreadCount, isEncrypted: $isEncrypted, encryptionNonce: $encryptionNonce)';
 }
 
 
@@ -128,7 +134,7 @@ abstract mixin class _$ConversationModelCopyWith<$Res> implements $ConversationM
   factory _$ConversationModelCopyWith(_ConversationModel value, $Res Function(_ConversationModel) _then) = __$ConversationModelCopyWithImpl;
 @override @useResult
 $Res call({
- String roomId, String lastMessage, String lastMessageTime, String otherUserId, String otherUserName, String? otherUserImage, String otherUserType, bool isOnline, int unreadCount
+ String roomId, String lastMessage, String lastMessageTime, String otherUserId, String otherUserName, String? otherUserImage, String otherUserType, String? otherUserPublicKey, bool isOnline, int unreadCount, bool isEncrypted, String? encryptionNonce
 });
 
 
@@ -145,7 +151,7 @@ class __$ConversationModelCopyWithImpl<$Res>
 
 /// Create a copy of ConversationModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? roomId = null,Object? lastMessage = null,Object? lastMessageTime = null,Object? otherUserId = null,Object? otherUserName = null,Object? otherUserImage = freezed,Object? otherUserType = null,Object? isOnline = null,Object? unreadCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? roomId = null,Object? lastMessage = null,Object? lastMessageTime = null,Object? otherUserId = null,Object? otherUserName = null,Object? otherUserImage = freezed,Object? otherUserType = null,Object? otherUserPublicKey = freezed,Object? isOnline = null,Object? unreadCount = null,Object? isEncrypted = null,Object? encryptionNonce = freezed,}) {
   return _then(_ConversationModel(
 roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
 as String,lastMessage: null == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
@@ -154,9 +160,12 @@ as String,otherUserId: null == otherUserId ? _self.otherUserId : otherUserId // 
 as String,otherUserName: null == otherUserName ? _self.otherUserName : otherUserName // ignore: cast_nullable_to_non_nullable
 as String,otherUserImage: freezed == otherUserImage ? _self.otherUserImage : otherUserImage // ignore: cast_nullable_to_non_nullable
 as String?,otherUserType: null == otherUserType ? _self.otherUserType : otherUserType // ignore: cast_nullable_to_non_nullable
-as String,isOnline: null == isOnline ? _self.isOnline : isOnline // ignore: cast_nullable_to_non_nullable
+as String,otherUserPublicKey: freezed == otherUserPublicKey ? _self.otherUserPublicKey : otherUserPublicKey // ignore: cast_nullable_to_non_nullable
+as String?,isOnline: null == isOnline ? _self.isOnline : isOnline // ignore: cast_nullable_to_non_nullable
 as bool,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,isEncrypted: null == isEncrypted ? _self.isEncrypted : isEncrypted // ignore: cast_nullable_to_non_nullable
+as bool,encryptionNonce: freezed == encryptionNonce ? _self.encryptionNonce : encryptionNonce // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

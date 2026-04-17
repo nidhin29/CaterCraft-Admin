@@ -66,9 +66,21 @@ class BookingsTab extends StatelessWidget {
     );
   }
 
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case "Approved":
+      case "Accepted": return AppTheme.statusApproved;
+      case "In Kitchen": return AppTheme.statusKitchen;
+      case "Dispatched": return AppTheme.statusDispatched;
+      case "Completed":
+      case "Confirmed": return AppTheme.statusConfirmed;
+      case "Cancelled": return AppTheme.statusCancelled;
+      default: return AppTheme.statusPending;
+    }
+  }
+
   Widget _bookingCard(BuildContext context, BookingModel booking) {
-    final bool isConfirmed = booking.status == "Confirmed";
-    final Color statusColor = isConfirmed ? AppTheme.statusConfirmed : AppTheme.statusPending;
+    final Color statusColor = _getStatusColor(booking.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -84,42 +96,55 @@ class BookingsTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.calendar_today_rounded, color: statusColor, size: 20),
                   ),
-                  child: Icon(Icons.calendar_today_rounded, color: statusColor, size: 20),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        booking.service.name,
-                        style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        booking.customerEmail,
-                        style: const TextStyle(color: Colors.white38, fontSize: 13),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          booking.service.name,
+                          style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          booking.customerEmail,
+                          style: const TextStyle(color: Colors.white38, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildStatusChip(booking.status, statusColor),
+                ],
+              ),
+              if (booking.paymentStatus == "Paid")
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    "Earning: ₹${(booking.ownerPayout ?? (booking.service.rate * 0.9)).toStringAsFixed(0)} (Net)",
+                    style: GoogleFonts.outfit(color: AppTheme.ownerAccent, fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                 ),
-                _buildStatusChip(booking.status, statusColor),
-              ],
-            ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatusChip(String status, Color color) {
     return Container(

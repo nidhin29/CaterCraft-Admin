@@ -24,6 +24,7 @@ class ServiceManagementRepo implements ServiceManagementService {
     required String duration,
     required String description,
     required File image,
+    required String serviceGroup,
   }) async {
     try {
       final String fileName = image.path.split('/').last;
@@ -32,6 +33,7 @@ class ServiceManagementRepo implements ServiceManagementService {
         'rate': rate,
         'duration': duration,
         'description': description,
+        'service_group': serviceGroup,
         'image': await MultipartFile.fromFile(
           image.path,
           filename: fileName,

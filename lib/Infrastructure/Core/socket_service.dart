@@ -126,6 +126,8 @@ class SocketService {
     required String message,
     required String room,
     String? imageUrl,
+    bool isEncrypted = false,
+    String? encryptionNonce,
   }) {
     socket.emit('send_private_message', {
       'senderId': senderId,
@@ -135,8 +137,10 @@ class SocketService {
       'message': message,
       'room': room,
       'imageUrl': imageUrl,
+      'isEncrypted': isEncrypted,
+      'encryptionNonce': encryptionNonce,
     });
-    log('✉️ Emitting message to $room ${imageUrl != null ? "(with image)" : ""}');
+    log('✉️ Emitting message to $room ${imageUrl != null ? "(with image)" : ""} ${isEncrypted ? "(🔒 encrypted)" : ""}');
   }
 
   void listenForMessages(Function(dynamic) onMessage) {

@@ -43,7 +43,7 @@ class _ChatListTabState extends State<ChatListTab> {
             ),
           ),
           title: Text(
-            "COMMUB",
+            "COMMHUB",
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontSize: 18,
@@ -96,13 +96,9 @@ class _ChatListTabState extends State<ChatListTab> {
               );
             }
 
-            final user = state.ownerDetails.fold(() => null, (u) => u);
-            final myId = user?.id ?? '';
+            // final user = state.ownerDetails.fold(() => null, (u) => u);
+            // final myId = user?.id ?? '';
             final recentConversations = state.conversations;
-
-            // Filter staff who don't have an active conversation yet (for discovery)
-            final contactedStaffIds = recentConversations.map((c) => c.otherUserId).toSet();
-            final availableContacts = state.staffList.where((s) => !contactedStaffIds.contains(s.id)).toList();
 
             return SliverList(
               delegate: SliverChildListDelegate([
@@ -132,31 +128,7 @@ class _ChatListTabState extends State<ChatListTab> {
                     );
                   }),
                 ],
-                if (availableContacts.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  _sectionHeader("AVAILABLE CONTACTS"),
-                  ...availableContacts.map((staff) {
-                    final staffId = staff.id ?? '';
-                    final roomId = (myId.compareTo(staffId) < 0) ? '${myId}_$staffId' : '${staffId}_$myId';
-                    return _chatItem(
-                      context,
-                      name: staff.fullName ?? "Staff Member",
-                      imageUrl: staff.profileImageThumbnail,
-                      lastMessage: "Start a new conversation",
-                      time: "",
-                      isOnline: false, // Initial discovery state
-                      unreadCount: 0,
-                      onTap: () => _navigateToChat(
-                        context,
-                        roomId: roomId,
-                        name: staff.fullName ?? "Staff",
-                        id: staffId,
-                        type: 'Staff',
-                      ),
-                    );
-                  }),
-                ],
-                if (recentConversations.isEmpty && availableContacts.isEmpty)
+                if (recentConversations.isEmpty)
                   Padding(
                     padding: const EdgeInsets.only(top: 100),
                     child: Center(
@@ -164,7 +136,7 @@ class _ChatListTabState extends State<ChatListTab> {
                         children: [
                           const Icon(Icons.chat_bubble_outline_rounded, size: 64, color: Colors.white10),
                           const SizedBox(height: 16),
-                          Text("No contacts found", style: GoogleFonts.outfit(color: Colors.white38)),
+                          Text("No active conversations", style: GoogleFonts.outfit(color: Colors.white38)),
                         ],
                       ),
                     ),

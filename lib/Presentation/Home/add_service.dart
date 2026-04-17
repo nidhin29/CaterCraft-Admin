@@ -21,6 +21,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final _durationController = TextEditingController();
   final _descController = TextEditingController();
   File? _image;
+  String _selectedGroup = 'wedding';
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -61,6 +62,9 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                   _buildLabel("Service Name"),
                   _textField(_nameController, "e.g. Premium Buffet", Icons.restaurant),
                   const SizedBox(height: 20),
+                  _buildLabel("Service Group"),
+                  _dropdownField(),
+                  const SizedBox(height: 20),
                   _buildLabel("Rate (per person)"),
                   _textField(_rateController, "e.g. 1500", Icons.attach_money, isNumber: true),
                   const SizedBox(height: 20),
@@ -87,6 +91,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                                       duration: _durationController.text,
                                       description: _descController.text,
                                       image: _image!,
+                                      serviceGroup: _selectedGroup,
                                     );
                               }
                             },
@@ -155,6 +160,32 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
         contentPadding: const EdgeInsets.all(20),
       ),
       validator: (v) => v!.isEmpty ? "Required" : null,
+    );
+  }
+
+  Widget _dropdownField() {
+    return DropdownButtonFormField<String>(
+      value: _selectedGroup,
+      dropdownColor: AppTheme.cardColor,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.category, color: Colors.white30),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      ),
+      items: ["wedding", "corporate", "parties", "global"]
+          .map((group) => DropdownMenuItem(
+                value: group,
+                child: Text(
+                  group[0].toUpperCase() + group.substring(1),
+                  style: GoogleFonts.outfit(color: Colors.white),
+                ),
+              ))
+          .toList(),
+      onChanged: (val) {
+        if (val != null) {
+          setState(() => _selectedGroup = val);
+        }
+      },
     );
   }
 }

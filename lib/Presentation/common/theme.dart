@@ -75,7 +75,10 @@ class AppTheme {
       );
 
   // Status Colors for Premium Badges
-  static const Color statusConfirmed = Color(0xFF00FFA3);
   static const Color statusPending = Color(0xFFFFD600);
+  static const Color statusApproved = Color(0xFF00E5FF);
+  static const Color statusKitchen = Color(0xFFFF9100);
+  static const Color statusDispatched = Color(0xFF007BFF);
+  static const Color statusConfirmed = Color(0xFF00FFA3);
   static const Color statusCancelled = Color(0xFFFF4B4B);
 }

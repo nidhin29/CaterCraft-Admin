@@ -22,4 +22,5 @@ abstract class OwnerService {
     String? fcmToken,
   });
   Future<Either<MainFailure, Unit>> updatePassword({required String oldPassword, required String newPassword});
+  Future<Either<MainFailure, Unit>> updatePublicKey(String publicKey);
 }

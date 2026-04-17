@@ -171,4 +171,21 @@ class OwnerRepo implements OwnerService {
       return const Left(MainFailure.serverFailure());
     }
   }
+
+  @override
+  Future<Either<MainFailure, Unit>> updatePublicKey(String publicKey) async {
+    try {
+      final response = await _dio.patch(
+        'api/v1/security/update-public-key',
+        data: {'publicKey': publicKey},
+      );
+      if (response.statusCode == 200) {
+        return const Right(unit);
+      }
+      return const Left(MainFailure.serverFailure());
+    } catch (e) {
+      log('Update Public Key Error: $e');
+      return const Left(MainFailure.serverFailure());
+    }
+  }
 }

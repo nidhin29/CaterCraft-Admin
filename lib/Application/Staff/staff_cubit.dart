@@ -17,7 +17,7 @@ class StaffCubit extends Cubit<StaffState> {
 
   Future<void> fetchAssignedBookings() async {
     emit(state.copyWith(isLoading: true, failureOrSuccess: none()));
-    final result = await _bookingService.getBookings();
+    final result = await _bookingService.getStaffTasks();
     emit(state.copyWith(
       isLoading: false,
       failureOrSuccess: some(result),

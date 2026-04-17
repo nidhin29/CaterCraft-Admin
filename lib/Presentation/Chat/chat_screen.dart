@@ -1,4 +1,5 @@
 import 'package:catering/Domain/Chat/message_model.dart';
+import 'package:catering/Presentation/Chat/widgets/encrypted_image_widget.dart';
 import 'package:catering/Application/Chat/chat_cubit.dart';
 import 'package:catering/Application/Chat/chat_state.dart';
 import 'package:catering/Application/Owner/owner_cubit.dart';
@@ -48,8 +49,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _chatCubit = getIt<ChatCubit>();
+    _chatCubit.joinRoom(widget.roomId, widget.otherUserId);
     _chatCubit.fetchHistory(widget.roomId);
-    _chatCubit.joinRoom(widget.roomId);
 
     _scrollController.addListener(_onScroll);
     _msgController.addListener(_onTextChanged);
@@ -96,14 +97,50 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (image != null && _myId.isNotEmpty) {
-      _chatCubit.sendImageMessage(
-        senderId: _myId,
-        senderType: _myType,
-        receiverId: widget.otherUserId,
-        receiverType: widget.otherUserType,
-        room: widget.roomId,
-        imageFile: File(image.path),
+    if (image != null && _myId.isNotEmpty && mounted) {
+      // Confirmation Dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.darkBackground,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text("Send Image?", style: GoogleFonts.outfit(color: Colors.white, fontSize: 18)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(File(image.path), height: 200, fit: BoxFit.cover),
+              ),
+              const SizedBox(height: 16),
+              Text("Do you want to send this image?", style: GoogleFonts.outfit(color: Colors.white70, fontSize: 14)),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel", style: GoogleFonts.outfit(color: Colors.white38)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _myType == 'Owner' ? AppTheme.ownerAccent : AppTheme.staffAccent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                _chatCubit.sendImageMessage(
+                  senderId: _myId,
+                  senderType: _myType,
+                  receiverId: widget.otherUserId,
+                  receiverType: widget.otherUserType,
+                  room: widget.roomId,
+                  imageFile: File(image.path),
+                );
+              },
+              child: Text("Send", style: GoogleFonts.outfit(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
       );
     }
   }
@@ -289,36 +326,51 @@ class _ChatScreenState extends State<ChatScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: state.isOtherUserTyping ? Colors.amberAccent : Colors.greenAccent, 
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              if (state.isOtherUserTyping)
+                    if (state.isOtherUserTyping)
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.amberAccent, 
+                              shape: BoxShape.circle,
+                              boxShadow: [
                                 BoxShadow(
                                   color: Colors.amberAccent.withOpacity(0.5),
                                   blurRadius: 4,
                                   spreadRadius: 1,
                                 )
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          state.isOtherUserTyping ? "typing..." : "Secure Connection",
-                          style: GoogleFonts.outfit(
-                            color: state.isOtherUserTyping ? Colors.amberAccent : Colors.white38, 
-                            fontSize: 10, 
-                            letterSpacing: 0.5,
-                            fontWeight: state.isOtherUserTyping ? FontWeight.bold : FontWeight.normal,
+                          const SizedBox(width: 4),
+                          Text(
+                            "typing...",
+                            style: GoogleFonts.outfit(
+                              color: Colors.amberAccent, 
+                              fontSize: 10, 
+                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      )
+                    else if (state.recipientPublicKey != null)
+                      Row(
+                        children: [
+                          const Icon(Icons.lock, color: Colors.white38, size: 10),
+                          const SizedBox(width: 4),
+                          Text(
+                            "End-to-End Encrypted",
+                            style: GoogleFonts.outfit(
+                              color: Colors.white38,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -394,20 +446,26 @@ class _ChatScreenState extends State<ChatScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (msg.imageUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: CachedNetworkImage(
-                        imageUrl: msg.imageUrl!,
-                        placeholder: (context, url) => Container(
-                          height: 200,
-                          width: double.infinity,
-                          color: Colors.white10,
-                          child: const Center(child: CircularProgressIndicator()),
+                    msg.isEncrypted && msg.encryptionNonce != null && context.read<ChatCubit>().state.recipientPublicKey != null
+                      ? EncryptedImageWidget(
+                          imageUrl: msg.imageUrl!,
+                          nonce: msg.encryptionNonce!,
+                          senderPublicKey: context.read<ChatCubit>().state.recipientPublicKey!,
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: CachedNetworkImage(
+                            imageUrl: msg.imageUrl!,
+                            placeholder: (context, url) => Container(
+                              height: 200,
+                              width: double.infinity,
+                              color: Colors.white10,
+                              child: const Center(child: CircularProgressIndicator()),
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.error),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
                   if (msg.imageUrl != null && msg.message != "[Image]")
                     Padding(
                       padding: const EdgeInsets.all(12),

@@ -10,6 +10,7 @@ abstract class ServiceManagementService {
     required String duration,
     required String description,
     required File image,
+    required String serviceGroup,
   });
 
   Future<Either<MainFailure, List<ServiceModel>>> viewServices();

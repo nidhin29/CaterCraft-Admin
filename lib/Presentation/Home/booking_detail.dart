@@ -1,6 +1,10 @@
+import 'package:catering/Application/Owner/owner_cubit.dart';
 import 'package:catering/Domain/bookings/booking_model/booking_model.dart';
+import 'package:catering/Domain/SignIn/sign_in_model/user_model.dart';
+import 'package:catering/Presentation/Home/widgets/staff_selection_sheet.dart';
 import 'package:catering/Presentation/common/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -16,42 +20,56 @@ class BookingDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(context),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 32),
-                  _buildDetailSection("Customer Details", [
-                    _detailRow(Icons.email_outlined, booking.customerEmail),
-                    _detailRow(Icons.calendar_today_outlined, _formatDate(booking.dateTime)),
-                  ]),
-                  const SizedBox(height: 32),
-                  _buildDetailSection("Service Details", [
-                    _detailRow(Icons.restaurant_menu_outlined, booking.service.name),
-                    _detailRow(Icons.description_outlined, booking.service.description),
-                    _detailRow(Icons.currency_rupee, "${booking.service.rate} / person"),
-                  ]),
-                  const SizedBox(height: 32),
-                  if (isOwner) _buildPaymentStatus(),
-                  if (!isOwner) _buildStaffTasks(),
-                  const SizedBox(height: 100),
-                ],
+    return BlocBuilder<OwnerCubit, OwnerState>(
+      builder: (context, state) {
+        // Use the updated booking from state if available
+        final currentBooking = state.bookings.firstWhere(
+          (b) => b.id == booking.id,
+          orElse: () => booking,
+        );
+
+        return Scaffold(
+          bottomNavigationBar: _buildActionBar(context, currentBooking),
+          body: CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(context, currentBooking),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(currentBooking),
+                      const SizedBox(height: 32),
+                      _buildDetailSection("Customer Details", [
+                        _detailRow(Icons.email_outlined, currentBooking.customerEmail),
+                        _detailRow(Icons.calendar_today_outlined, _formatDate(currentBooking.dateTime)),
+                      ]),
+                      const SizedBox(height: 32),
+                      _buildDetailSection("Service Details", [
+                        _detailRow(Icons.restaurant_menu_outlined, currentBooking.service.name),
+                        _detailRow(Icons.description_outlined, currentBooking.service.description ?? "No description provided"),
+                        _detailRow(Icons.timer_outlined, currentBooking.service.duration ?? "Flexible duration"),
+                        _detailRow(Icons.currency_rupee, "${currentBooking.service.rate} / person"),
+                      ]),
+                      const SizedBox(height: 32),
+                      _buildStaffAssignment(context, currentBooking),
+                      const SizedBox(height: 32),
+                      if (isOwner) _buildPaymentStatus(currentBooking),
+                      if (!isOwner) _buildStaffTasks(currentBooking),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
+  Widget _buildSliverAppBar(BuildContext context, BookingModel booking) {
     return SliverAppBar(
       expandedHeight: 250,
       pinned: true,
@@ -87,7 +105,7 @@ class BookingDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BookingModel booking) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -113,6 +131,102 @@ class BookingDetailScreen extends StatelessWidget {
           style: GoogleFonts.outfit(color: Colors.white38, fontSize: 14),
         ),
       ],
+    );
+  }
+
+  Widget _buildStaffAssignment(BuildContext context, BookingModel booking) {
+    final assignedStaff = booking.assignedStaff ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Assigned Team",
+              style: GoogleFonts.outfit(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.white70,
+              ),
+            ),
+            if (isOwner)
+              TextButton.icon(
+                onPressed: () => _openStaffSelection(context, booking),
+                icon: const Icon(Icons.edit_outlined, size: 16),
+                label: const Text("Manage"),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.ownerAccent,
+                  textStyle: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (assignedStaff.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppTheme.cardColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.05)),
+            ),
+            child: const Text(
+              "No staff assigned yet",
+              style: TextStyle(color: Colors.white24, fontSize: 14),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: assignedStaff.map((staff) => _staffAvatar(staff)).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _staffAvatar(UserModel staff) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: Colors.white10,
+            backgroundImage: staff.profileImageThumbnail != null ? NetworkImage(staff.profileImageThumbnail!) : null,
+            child: staff.profileImageThumbnail == null ? const Icon(Icons.person, size: 12, color: Colors.white38) : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            staff.fullName ?? "Staff",
+            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openStaffSelection(BuildContext context, BookingModel booking) {
+    context.read<OwnerCubit>().fetchStaff();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => StaffSelectionSheet(
+        initialSelectedIds: booking.assignedStaff?.map((s) => s.id!).toList() ?? [],
+        onSelected: (selectedIds) {
+          context.read<OwnerCubit>().assignStaffToBooking(booking.id!, selectedIds);
+        },
+      ),
     );
   }
 
@@ -177,39 +291,59 @@ class BookingDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentStatus() {
-    final hasPaid = booking.razorpayOrderId != null;
-    return _buildDetailSection("Payment Awareness", [
+  Widget _buildPaymentStatus(BookingModel booking) {
+    final hasPaid = booking.paymentStatus == "Paid" || booking.razorpayOrderId != null;
+    return _buildDetailSection("Financial Summary", [
       Row(
         children: [
           Icon(
             hasPaid ? Icons.check_circle : Icons.pending_actions,
             color: hasPaid ? Colors.greenAccent : Colors.redAccent,
+            size: 20,
           ),
           const SizedBox(width: 12),
           Text(
-            hasPaid ? "Deposit Paid" : "Payment Pending",
-            style: TextStyle(
-              color: hasPaid ? Colors.greenAccent : Colors.redAccent,
-              fontWeight: FontWeight.bold,
+            hasPaid ? "Payment Received" : "Payment Pending",
+            style: TextStyle(color: hasPaid ? Colors.greenAccent : Colors.redAccent, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+      if (hasPaid && booking.ownerPayout != null) ...[
+        const SizedBox(height: 16),
+        const Divider(color: Colors.white10),
+        const SizedBox(height: 16),
+        _financialRow("Booking Rate", "₹${booking.totalAmount}"),
+        _financialRow("Admin Commission", "- ₹${booking.adminCommission}"),
+        const SizedBox(height: 8),
+        _financialRow("Your Net Earnings", "₹${booking.ownerPayout}", isHighlight: true),
+      ]
+    ]);
+  }
+
+  Widget _financialRow(String label, String value, {bool isHighlight = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: isHighlight ? Colors.white : Colors.white54, fontSize: 13)),
+          Text(
+            value,
+            style: GoogleFonts.outfit(
+              color: isHighlight ? AppTheme.ownerAccent : Colors.white,
+              fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
+              fontSize: isHighlight ? 16 : 13,
             ),
           ),
         ],
       ),
-      if (hasPaid) ...[
-        const SizedBox(height: 12),
-        Text(
-          "Order ID: ${booking.razorpayOrderId}",
-          style: const TextStyle(color: Colors.white38, fontSize: 12),
-        ),
-      ],
-    ]);
+    );
   }
 
-  Widget _buildStaffTasks() {
-    return _buildDetailSection("Checklist", [
-      _taskItem("Prepare Ingredients", true),
-      _taskItem("Setup Venue", false),
+  Widget _buildStaffTasks(BookingModel booking) {
+    return _buildDetailSection("Service Checklist", [
+      _taskItem("Setup Service Area", true),
+      _taskItem("Confirm Menu Requirements", true),
       _taskItem("Serve Food", false),
       _taskItem("Cleanup", false),
     ]);
@@ -245,5 +379,184 @@ class BookingDetailScreen extends StatelessWidget {
     } catch (e) {
       return dateStr;
     }
+  }
+
+  Widget? _buildActionBar(BuildContext context, BookingModel booking) {
+    if (booking.status == "Completed" || booking.status == "Cancelled") {
+      return null;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: AppTheme.darkBackground,
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: _getActionButtons(context, booking),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _getActionButtons(BuildContext context, BookingModel booking) {
+    List<Widget> buttons = [];
+
+    if (booking.status == "Pending" && isOwner) {
+      buttons.add(
+        Expanded(
+          child: _actionButton(
+            context,
+            "Reject",
+            Colors.redAccent,
+            () => _confirmStatusChange(context, booking, "Cancelled", "Are you sure you want to reject this booking?"),
+            isOutline: true,
+          ),
+        ),
+      );
+      buttons.add(const SizedBox(width: 16));
+      buttons.add(
+        Expanded(
+          child: _actionButton(
+            context,
+            "Approve",
+            Colors.greenAccent,
+            () => _confirmStatusChange(context, booking, "Approved", "Do you want to accept and approve this booking?"),
+          ),
+        ),
+      );
+    } else if (booking.status == "Approved" || booking.status == "Accepted") {
+      final bool isPaid = booking.paymentStatus == "Paid" || booking.razorpayOrderId != null;
+
+      if (!isPaid && isOwner) {
+        buttons.add(
+          const Expanded(
+            child: Center(
+              child: Text(
+                "Waiting for Customer Payment...",
+                style: TextStyle(color: Colors.white38, fontStyle: FontStyle.italic, fontSize: 13),
+              ),
+            ),
+          ),
+        );
+      } else {
+        buttons.add(
+          Expanded(
+            child: _actionButton(
+              context,
+              "Move to Kitchen",
+              AppTheme.ownerAccent,
+              () => context.read<OwnerCubit>().updateBookingStatus(booking.id!, "In Kitchen"),
+            ),
+          ),
+        );
+      }
+    } else if (booking.status == "In Kitchen") {
+      buttons.add(
+        Expanded(
+          child: _actionButton(
+            context,
+            "Mark as Dispatched",
+            Colors.blueAccent,
+            () => context.read<OwnerCubit>().updateBookingStatus(booking.id!, "Dispatched"),
+          ),
+        ),
+      );
+    } else if (booking.status == "Dispatched") {
+      buttons.add(
+        Expanded(
+          child: _actionButton(
+            context,
+            "Order Completed",
+            Colors.greenAccent,
+            () => context.read<OwnerCubit>().updateBookingStatus(booking.id!, "Completed"),
+          ),
+        ),
+      );
+    }
+
+    if (buttons.isEmpty) {
+      buttons.add(
+        const Expanded(
+          child: Center(
+            child: Text(
+              "Waiting for next stage...",
+              style: TextStyle(color: Colors.white24, fontStyle: FontStyle.italic),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return buttons;
+  }
+
+  Widget _actionButton(BuildContext context, String label, Color color, VoidCallback onPressed, {bool isOutline = false}) {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: isOutline ? Colors.transparent : color,
+        borderRadius: BorderRadius.circular(16),
+        border: isOutline ? Border.all(color: color.withOpacity(0.5)) : null,
+        boxShadow: isOutline ? [] : [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.outfit(
+                color: isOutline ? color : Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmStatusChange(BuildContext context, BookingModel booking, String newStatus, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text("Update Status", style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Text(message, style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.white38)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<OwnerCubit>().updateBookingStatus(booking.id!, newStatus);
+            },
+            child: Text("Update", style: TextStyle(color: newStatus == "Cancelled" ? Colors.redAccent : Colors.greenAccent, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 }

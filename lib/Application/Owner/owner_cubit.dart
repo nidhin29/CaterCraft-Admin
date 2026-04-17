@@ -12,6 +12,7 @@ import 'package:catering/Infrastructure/Core/socket_service.dart';
 import 'package:catering/Domain/Owner/owner_service.dart';
 import 'package:catering/Domain/Service/service_model.dart';
 import 'package:catering/Domain/SignIn/sign_in_model/user_model.dart';
+import 'package:catering/Domain/Security/security_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -28,6 +29,7 @@ class OwnerCubit extends Cubit<OwnerState> {
   final OwnerService _ownerService;
   final SocketService _socketService;
   final ChatService _chatService;
+  final SecurityService _securityService;
 
   OwnerCubit(
     this._bookingService,
@@ -35,6 +37,7 @@ class OwnerCubit extends Cubit<OwnerState> {
     this._ownerService,
     this._socketService,
     this._chatService,
+    this._securityService,
   ) : super(OwnerState.initial()) {
     _loadMocks();
     _setupGlobalMessageListener();
@@ -61,7 +64,7 @@ class OwnerCubit extends Cubit<OwnerState> {
   }
 
   void _setupGlobalMessageListener() {
-    _messageListener = (data) {
+    _messageListener = (data) async {
       if (isClosed) return;
       try {
         final newMessage = MessageModel.fromJson(data as Map<String, dynamic>);
@@ -69,17 +72,34 @@ class OwnerCubit extends Cubit<OwnerState> {
         final myId = state.ownerDetails.fold(() => '', (u) => u.id ?? '');
 
         // Update the conversations list with the new message snippet and unread count
-        final updatedConversations = state.conversations.map((conv) {
+        final updatedConversations = await Future.wait(state.conversations.map((conv) async {
           if (conv.roomId == newMessage.room) {
             final isOwnMessage = newMessage.senderId == myId;
+            String displayMessage = newMessage.message;
+
+            if (newMessage.isEncrypted && newMessage.encryptionNonce != null) {
+              final otherPubKey = conv.otherUserPublicKey;
+              if (otherPubKey != null) {
+                try {
+                  displayMessage = await _securityService.decryptText(
+                    ciphertextBase64: newMessage.message,
+                    nonceBase64: newMessage.encryptionNonce!,
+                    senderPublicKey: otherPubKey,
+                  );
+                } catch (e) {
+                  displayMessage = "[🔒 Encrypted Message]";
+                }
+              }
+            }
+
             return conv.copyWith(
-              lastMessage: newMessage.message,
+              lastMessage: displayMessage,
               lastMessageTime: newMessage.createdAt ?? DateTime.now().toIso8601String(),
               unreadCount: isOwnMessage ? conv.unreadCount : conv.unreadCount + 1,
             );
           }
           return conv;
-        }).toList();
+        }));
 
         // If it's a message from someone new, we might want to refresh the whole list
         final roomExists = state.conversations.any((c) => c.roomId == newMessage.room);
@@ -132,8 +152,36 @@ class OwnerCubit extends Cubit<OwnerState> {
     ));
   }
 
-  void clearBookingStatus() {
-    emit(state.copyWith(bookingFailureOrSuccess: none()));
+  Future<void> updateBookingStatus(String bookingId, String newStatus) async {
+    emit(state.copyWith(isLoading: true, bookingFailureOrSuccess: none()));
+    final result = await _bookingService.updateStatus(bookingId, newStatus);
+    
+    result.fold(
+      (failure) => emit(state.copyWith(
+        isLoading: false,
+        bookingFailureOrSuccess: some(left(failure)),
+      )),
+      (_) {
+        emit(state.copyWith(isLoading: false));
+        fetchBookings(); // Refresh list to reflect changes
+      },
+    );
+  }
+
+  Future<void> assignStaffToBooking(String bookingId, List<String> staffIds) async {
+    emit(state.copyWith(isLoading: true, assignStaffFailureOrSuccess: none()));
+    final result = await _bookingService.assignStaff(bookingId, staffIds);
+    emit(state.copyWith(
+      isLoading: false,
+      assignStaffFailureOrSuccess: some(result),
+    ));
+    if (result.isRight()) {
+      fetchBookings(); // Refresh list to show updated assignments
+    }
+  }
+
+  void clearAssignStaffStatus() {
+    emit(state.copyWith(assignStaffFailureOrSuccess: none()));
   }
 
   Future<void> addService({
@@ -142,6 +190,7 @@ class OwnerCubit extends Cubit<OwnerState> {
     required String duration,
     required String description,
     required File image,
+    required String serviceGroup,
   }) async {
     emit(state.copyWith(isSubmitting: true, serviceFailureOrSuccess: none()));
     final result = await _serviceService.addService(
@@ -150,6 +199,7 @@ class OwnerCubit extends Cubit<OwnerState> {
       duration: duration,
       description: description,
       image: image,
+      serviceGroup: serviceGroup,
     );
     emit(state.copyWith(
       isSubmitting: false,
@@ -205,11 +255,30 @@ class OwnerCubit extends Cubit<OwnerState> {
     final result = await _ownerService.getDetails();
     result.fold(
       (failure) => null,
-      (user) => emit(state.copyWith(
-        isLoading: false,
-        ownerDetails: some(user),
-      )),
+      (user) {
+        emit(state.copyWith(
+          isLoading: false,
+          ownerDetails: some(user),
+        ));
+        _syncE2EEKeys();
+      },
     );
+  }
+
+  Future<void> _syncE2EEKeys() async {
+    try {
+      final publicKey = await _securityService.getOrGenerateKeys();
+      
+      // Check if server already has this key to avoid redundant updates
+      final currentDetails = state.ownerDetails.fold(() => null, (u) => u);
+      if (currentDetails != null && currentDetails.chatPublicKey == publicKey) {
+        return;
+      }
+
+      await _ownerService.updatePublicKey(publicKey);
+    } catch (e) {
+      log('E2EE Key Sync Error: $e');
+    }
   }
 
   Future<void> updateProfile({
@@ -278,10 +347,35 @@ class OwnerCubit extends Cubit<OwnerState> {
   Future<void> fetchRecentConversations() async {
     emit(state.copyWith(isLoading: true));
     final result = await _chatService.getRecentChats();
-    emit(state.copyWith(
-      isLoading: false,
-      conversations: result.getOrElse(() => []),
-    ));
+    
+    result.fold(
+      (failure) => emit(state.copyWith(isLoading: false)),
+      (conversations) async {
+        List<ConversationModel> decryptedConvs = [];
+        
+        for (var conv in conversations) {
+          String displayMessage = conv.lastMessage;
+          if (conv.isEncrypted && conv.encryptionNonce != null && conv.otherUserPublicKey != null) {
+            try {
+              displayMessage = await _securityService.decryptText(
+                ciphertextBase64: conv.lastMessage,
+                nonceBase64: conv.encryptionNonce!,
+                senderPublicKey: conv.otherUserPublicKey!,
+              );
+            } catch (e) {
+              log('❌ E2EE Inbox Decryption Error: $e');
+              displayMessage = "[🔒 Encrypted Message]";
+            }
+          }
+          decryptedConvs.add(conv.copyWith(lastMessage: displayMessage));
+        }
+
+        emit(state.copyWith(
+          isLoading: false,
+          conversations: decryptedConvs,
+        ));
+      },
+    );
   }
 
   Future<void> syncFCMToken() async {

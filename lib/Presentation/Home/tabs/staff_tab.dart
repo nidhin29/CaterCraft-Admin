@@ -2,6 +2,7 @@ import 'package:catering/Application/Owner/owner_cubit.dart';
 import 'package:catering/Domain/SignIn/sign_in_model/user_model.dart';
 import 'package:catering/Presentation/common/snack.dart';
 import 'package:catering/Presentation/common/theme.dart';
+import 'package:catering/Presentation/Chat/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -395,19 +396,8 @@ class _StaffTabState extends State<StaffTab> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  _detailRow(Icons.alternate_email, "Email", staff.email),
+                  _detailRow(Icons.alternate_email, "Email", staff.email ?? "N/A"),
                   _detailRow(Icons.fingerprint, "Staff ID", staff.id ?? "N/A"),
-                  _detailRow(
-                    Icons.verified_user_outlined,
-                    "Status",
-                    staff.isEmailVerified == true
-                        ? "Email Verified"
-                        : "Pending Verification",
-                    textColor:
-                        staff.isEmailVerified == true
-                            ? Colors.greenAccent
-                            : Colors.orangeAccent,
-                  ),
                   if (staff.createdAt != null)
                     _detailRow(
                       Icons.calendar_today_outlined,
@@ -443,10 +433,21 @@ class _StaffTabState extends State<StaffTab> {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             Navigator.pop(context);
-                            // TODO: Navigate to Chat with staff.id
-                            displaySnackBar(
-                              context: context,
-                              text: "Opening chat with ${staff.fullName}...",
+                            final myId = context.read<OwnerCubit>().state.ownerDetails.fold(() => '', (u) => u.id ?? '');
+                            final staffId = staff.id ?? '';
+                            if (myId.isEmpty) return;
+                            
+                            final roomId = (myId.compareTo(staffId) < 0) ? '${myId}_$staffId' : '${staffId}_$myId';
+                            
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  roomId: roomId,
+                                  otherUserName: staff.fullName ?? staff.name ?? "Specialist",
+                                  otherUserId: staffId,
+                                  otherUserType: 'Staff',
+                                ),
+                              ),
                             );
                           },
                           icon: const Icon(

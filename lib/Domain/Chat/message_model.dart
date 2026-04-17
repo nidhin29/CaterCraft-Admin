@@ -17,6 +17,8 @@ abstract class MessageModel with _$MessageModel {
     @Default(false) bool isEveryoneDeleted,
     @Default([]) List<String> deletedBy,
     @JsonKey(name: 'createdAt') String? createdAt,
+    @Default(false) bool isEncrypted,
+    @JsonKey(name: 'encryptionNonce') String? encryptionNonce,
   }) = _MessageModel;
 
   factory MessageModel.fromJson(Map<String, dynamic> json) => _$MessageModelFromJson(json);

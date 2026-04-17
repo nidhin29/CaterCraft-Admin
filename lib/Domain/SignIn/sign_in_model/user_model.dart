@@ -19,8 +19,8 @@ abstract class UserModel with _$UserModel {
   const UserModel._();
   const factory UserModel({
     @JsonKey(name: '_id') String? id,
-    @JsonKey(name: 'email') required String email,
-    @JsonKey(name: 'role') required int role, // 1 for Owner, 2 for Staff
+    @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'role') int? role, // 1 for Owner, 2 for Staff
     @JsonKey(name: 'fullName') String? fullName,
     @JsonKey(name: 'name') String? name,
     @JsonKey(name: 'designation') String? designation,
@@ -36,6 +36,7 @@ abstract class UserModel with _$UserModel {
     @JsonKey(name: 'isPasswordUpdated') bool? isPasswordUpdated,
     @JsonKey(name: 'createdAt') String? createdAt,
     @JsonKey(name: 'updatedAt') String? updatedAt,
+    @JsonKey(name: 'chatPublicKey') String? chatPublicKey,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);

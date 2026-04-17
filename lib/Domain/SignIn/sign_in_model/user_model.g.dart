@@ -21,8 +21,8 @@ Map<String, dynamic> _$OwnerInfoToJson(_OwnerInfo instance) =>
 
 _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   id: json['_id'] as String?,
-  email: json['email'] as String,
-  role: (json['role'] as num).toInt(),
+  email: json['email'] as String?,
+  role: (json['role'] as num?)?.toInt(),
   fullName: json['fullName'] as String?,
   name: json['name'] as String?,
   designation: json['designation'] as String?,
@@ -38,6 +38,7 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   isPasswordUpdated: json['isPasswordUpdated'] as bool?,
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
+  chatPublicKey: json['chatPublicKey'] as String?,
 );
 
 Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
@@ -60,4 +61,5 @@ Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
       'isPasswordUpdated': instance.isPasswordUpdated,
       'createdAt': instance.createdAt,
       'updatedAt': instance.updatedAt,
+      'chatPublicKey': instance.chatPublicKey,
     };

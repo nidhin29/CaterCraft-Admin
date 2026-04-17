@@ -8,20 +8,22 @@ part of 'service_model.dart';
 
 _ServiceModel _$ServiceModelFromJson(Map<String, dynamic> json) =>
     _ServiceModel(
-      id: json['id'] as String?,
-      name: json['name'] as String,
-      rate: (json['rate'] as num).toDouble(),
-      duration: json['duration'] as String,
-      description: json['description'] as String,
-      image: json['image'] as String?,
+      id: json['_id'] as String?,
+      name: json['service_name'] as String,
+      rate: json['rate'] as num,
+      duration: json['duration'] as String?,
+      description: json['description'] as String?,
+      image: json['imageUrl'] as String?,
+      serviceGroup: json['service_group'] as String?,
     );
 
 Map<String, dynamic> _$ServiceModelToJson(_ServiceModel instance) =>
     <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
+      '_id': instance.id,
+      'service_name': instance.name,
       'rate': instance.rate,
       'duration': instance.duration,
       'description': instance.description,
-      'image': instance.image,
+      'imageUrl': instance.image,
+      'service_group': instance.serviceGroup,
     };

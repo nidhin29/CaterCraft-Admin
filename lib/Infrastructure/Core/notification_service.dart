@@ -3,6 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:catering/Presentation/Home/notifications_screen.dart';
 import 'package:catering/main.dart';
+import 'package:catering/Domain/Security/security_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -53,9 +55,9 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
 
-    // 3. Listen for Foreground Messages
+    // 3. Listen for Foreground Messages (Both Notification and Data)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Foreground Message: ${message.notification?.title}');
+      debugPrint('Foreground Message received');
       _showLocalNotification(message);
     });
 
@@ -81,20 +83,48 @@ class NotificationService {
     }
   }
 
-  void _showLocalNotification(RemoteMessage message) {
-    RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    String? title = message.notification?.title;
+    String? body = message.notification?.body;
+    final data = message.data;
 
-    if (notification != null) {
-      _localNotifications.show(
-        id: notification.hashCode,
-        title: notification.title,
-        body: notification.body,
+    // IF E2EE DATA MESSAGE
+    if (data['isEncrypted'] == 'true' || data['encryptedBody'] != null) {
+      title = data['title'] ?? "New Message";
+      final encryptedBody = data['encryptedBody'];
+      final nonce = data['nonce'];
+      final senderPubKey = data['senderPublicKey'];
+
+      if (encryptedBody != null && nonce != null && senderPubKey != null) {
+        try {
+          // Manual instantiation for isolate compatibility
+          final security = SecurityService(); 
+          body = await security.decryptText(
+            ciphertextBase64: encryptedBody,
+            nonceBase64: nonce,
+            senderPublicKey: senderPubKey,
+          );
+        } catch (e) {
+          debugPrint("Failed to decrypt background notification: $e");
+          body = "🔒 New encrypted message";
+        }
+      }
+    }
+
+    if (title != null && body != null) {
+      AndroidNotification? android = message.notification?.android;
+
+      await _localNotifications.show(
+        id: message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch,
+        title: title,
+        body: body,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             _channel.id,
             _channel.name,
             channelDescription: _channel.description,
+            importance: Importance.max,
+            priority: Priority.high,
             icon: android?.smallIcon ?? '@mipmap/ic_launcher',
           ),
           iOS: const DarwinNotificationDetails(
@@ -135,6 +165,9 @@ class NotificationService {
 // Top-level background message handler
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   debugPrint("Handling a background message: ${message.messageId}");
-  // Firebase is initialized in main before this is potentially called in most scenarios
+  
+  // Directly use the logic to show notification (Decryption happens inside)
+  await NotificationService()._showLocalNotification(message);
 }

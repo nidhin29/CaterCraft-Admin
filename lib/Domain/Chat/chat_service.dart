@@ -10,4 +10,5 @@ abstract class ChatService {
   Future<Either<MainFailure, Unit>> markAsRead(String roomId);
   Future<Either<MainFailure, Unit>> deleteMessage(String messageId, {required String type});
   Future<Either<MainFailure, String>> uploadMedia(File file);
+  Future<Either<MainFailure, String>> getRecipientPublicKey(String userId);
 }

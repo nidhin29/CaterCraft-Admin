@@ -109,4 +109,21 @@ class ChatRepo implements ChatService {
       return const Left(MainFailure.serverFailure());
     }
   }
+
+  @override
+  Future<Either<MainFailure, String>> getRecipientPublicKey(String userId) async {
+    try {
+      final response = await _dio.get('api/v1/security/get-public-key/$userId');
+      if (response.statusCode == 200) {
+        final publicKey = response.data['data']['publicKey'] as String?;
+        if (publicKey != null) {
+          return Right(publicKey);
+        }
+      }
+      return const Left(MainFailure.serverFailure());
+    } catch (e) {
+      log('Get Public Key Error: $e');
+      return const Left(MainFailure.serverFailure());
+    }
+  }
 }

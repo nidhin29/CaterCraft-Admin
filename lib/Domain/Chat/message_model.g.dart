@@ -23,6 +23,8 @@ _MessageModel _$MessageModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       createdAt: json['createdAt'] as String?,
+      isEncrypted: json['isEncrypted'] as bool? ?? false,
+      encryptionNonce: json['encryptionNonce'] as String?,
     );
 
 Map<String, dynamic> _$MessageModelToJson(_MessageModel instance) =>
@@ -38,4 +40,6 @@ Map<String, dynamic> _$MessageModelToJson(_MessageModel instance) =>
       'isEveryoneDeleted': instance.isEveryoneDeleted,
       'deletedBy': instance.deletedBy,
       'createdAt': instance.createdAt,
+      'isEncrypted': instance.isEncrypted,
+      'encryptionNonce': instance.encryptionNonce,
     };

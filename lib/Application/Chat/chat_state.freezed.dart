@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatState {
 
- bool get isLoading; List<MessageModel> get messages; String? get error; int get currentPage; bool get hasMore; bool get isLoadMoreLoading; bool get isOtherUserTyping;
+ bool get isLoading; List<MessageModel> get messages; String? get error; int get currentPage; bool get hasMore; bool get isLoadMoreLoading; bool get isOtherUserTyping; String? get recipientPublicKey;
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $ChatStateCopyWith<ChatState> get copyWith => _$ChatStateCopyWithImpl<ChatState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadMoreLoading, isLoadMoreLoading) || other.isLoadMoreLoading == isLoadMoreLoading)&&(identical(other.isOtherUserTyping, isOtherUserTyping) || other.isOtherUserTyping == isOtherUserTyping));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadMoreLoading, isLoadMoreLoading) || other.isLoadMoreLoading == isLoadMoreLoading)&&(identical(other.isOtherUserTyping, isOtherUserTyping) || other.isOtherUserTyping == isOtherUserTyping)&&(identical(other.recipientPublicKey, recipientPublicKey) || other.recipientPublicKey == recipientPublicKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(messages),error,currentPage,hasMore,isLoadMoreLoading,isOtherUserTyping);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(messages),error,currentPage,hasMore,isLoadMoreLoading,isOtherUserTyping,recipientPublicKey);
 
 @override
 String toString() {
-  return 'ChatState(isLoading: $isLoading, messages: $messages, error: $error, currentPage: $currentPage, hasMore: $hasMore, isLoadMoreLoading: $isLoadMoreLoading, isOtherUserTyping: $isOtherUserTyping)';
+  return 'ChatState(isLoading: $isLoading, messages: $messages, error: $error, currentPage: $currentPage, hasMore: $hasMore, isLoadMoreLoading: $isLoadMoreLoading, isOtherUserTyping: $isOtherUserTyping, recipientPublicKey: $recipientPublicKey)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $ChatStateCopyWith<$Res>  {
   factory $ChatStateCopyWith(ChatState value, $Res Function(ChatState) _then) = _$ChatStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, List<MessageModel> messages, String? error, int currentPage, bool hasMore, bool isLoadMoreLoading, bool isOtherUserTyping
+ bool isLoading, List<MessageModel> messages, String? error, int currentPage, bool hasMore, bool isLoadMoreLoading, bool isOtherUserTyping, String? recipientPublicKey
 });
 
 
@@ -63,7 +63,7 @@ class _$ChatStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? messages = null,Object? error = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadMoreLoading = null,Object? isOtherUserTyping = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? messages = null,Object? error = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadMoreLoading = null,Object? isOtherUserTyping = null,Object? recipientPublicKey = freezed,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,8 @@ as String?,currentPage: null == currentPage ? _self.currentPage : currentPage //
 as int,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,isLoadMoreLoading: null == isLoadMoreLoading ? _self.isLoadMoreLoading : isLoadMoreLoading // ignore: cast_nullable_to_non_nullable
 as bool,isOtherUserTyping: null == isOtherUserTyping ? _self.isOtherUserTyping : isOtherUserTyping // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,recipientPublicKey: freezed == recipientPublicKey ? _self.recipientPublicKey : recipientPublicKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -83,7 +84,7 @@ as bool,
 
 
 class _ChatState implements ChatState {
-  const _ChatState({required this.isLoading, required final  List<MessageModel> messages, required this.error, this.currentPage = 1, this.hasMore = true, this.isLoadMoreLoading = false, this.isOtherUserTyping = false}): _messages = messages;
+  const _ChatState({required this.isLoading, required final  List<MessageModel> messages, required this.error, this.currentPage = 1, this.hasMore = true, this.isLoadMoreLoading = false, this.isOtherUserTyping = false, this.recipientPublicKey}): _messages = messages;
   
 
 @override final  bool isLoading;
@@ -99,6 +100,7 @@ class _ChatState implements ChatState {
 @override@JsonKey() final  bool hasMore;
 @override@JsonKey() final  bool isLoadMoreLoading;
 @override@JsonKey() final  bool isOtherUserTyping;
+@override final  String? recipientPublicKey;
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
@@ -110,16 +112,16 @@ _$ChatStateCopyWith<_ChatState> get copyWith => __$ChatStateCopyWithImpl<_ChatSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadMoreLoading, isLoadMoreLoading) || other.isLoadMoreLoading == isLoadMoreLoading)&&(identical(other.isOtherUserTyping, isOtherUserTyping) || other.isOtherUserTyping == isOtherUserTyping));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.error, error) || other.error == error)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.hasMore, hasMore) || other.hasMore == hasMore)&&(identical(other.isLoadMoreLoading, isLoadMoreLoading) || other.isLoadMoreLoading == isLoadMoreLoading)&&(identical(other.isOtherUserTyping, isOtherUserTyping) || other.isOtherUserTyping == isOtherUserTyping)&&(identical(other.recipientPublicKey, recipientPublicKey) || other.recipientPublicKey == recipientPublicKey));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_messages),error,currentPage,hasMore,isLoadMoreLoading,isOtherUserTyping);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_messages),error,currentPage,hasMore,isLoadMoreLoading,isOtherUserTyping,recipientPublicKey);
 
 @override
 String toString() {
-  return 'ChatState(isLoading: $isLoading, messages: $messages, error: $error, currentPage: $currentPage, hasMore: $hasMore, isLoadMoreLoading: $isLoadMoreLoading, isOtherUserTyping: $isOtherUserTyping)';
+  return 'ChatState(isLoading: $isLoading, messages: $messages, error: $error, currentPage: $currentPage, hasMore: $hasMore, isLoadMoreLoading: $isLoadMoreLoading, isOtherUserTyping: $isOtherUserTyping, recipientPublicKey: $recipientPublicKey)';
 }
 
 
@@ -130,7 +132,7 @@ abstract mixin class _$ChatStateCopyWith<$Res> implements $ChatStateCopyWith<$Re
   factory _$ChatStateCopyWith(_ChatState value, $Res Function(_ChatState) _then) = __$ChatStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, List<MessageModel> messages, String? error, int currentPage, bool hasMore, bool isLoadMoreLoading, bool isOtherUserTyping
+ bool isLoading, List<MessageModel> messages, String? error, int currentPage, bool hasMore, bool isLoadMoreLoading, bool isOtherUserTyping, String? recipientPublicKey
 });
 
 
@@ -147,7 +149,7 @@ class __$ChatStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? messages = null,Object? error = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadMoreLoading = null,Object? isOtherUserTyping = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? messages = null,Object? error = freezed,Object? currentPage = null,Object? hasMore = null,Object? isLoadMoreLoading = null,Object? isOtherUserTyping = null,Object? recipientPublicKey = freezed,}) {
   return _then(_ChatState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
@@ -156,7 +158,8 @@ as String?,currentPage: null == currentPage ? _self.currentPage : currentPage //
 as int,hasMore: null == hasMore ? _self.hasMore : hasMore // ignore: cast_nullable_to_non_nullable
 as bool,isLoadMoreLoading: null == isLoadMoreLoading ? _self.isLoadMoreLoading : isLoadMoreLoading // ignore: cast_nullable_to_non_nullable
 as bool,isOtherUserTyping: null == isOtherUserTyping ? _self.isOtherUserTyping : isOtherUserTyping // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,recipientPublicKey: freezed == recipientPublicKey ? _self.recipientPublicKey : recipientPublicKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:catering/Domain/bookings/booking_model/booking_model.dart';
 import 'package:catering/Domain/bookings/booking_service.dart';
 import 'package:dartz/dartz.dart';
@@ -14,11 +15,67 @@ class BookingRepo implements BookingService {
   Future<Either<MainFailure, List<BookingModel>>> getBookings() async {
     try {
       final response = await _dio.get('api/v1/booking/User/view-bookings');
-
+      log(response.data.toString());
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
         final bookings = data.map((json) => BookingModel.fromJson(json as Map<String, dynamic>)).toList();
         return Right(bookings);
+      } else {
+        return const Left(MainFailure.serverFailure());
+      }
+    } catch (e) {
+      log('❌ Get Bookings Error: $e');
+      return const Left(MainFailure.serverFailure());
+    }
+  }
+
+  @override
+  Future<Either<MainFailure, Unit>> assignStaff(String bookingId, List<String> staffIds) async {
+    try {
+      final response = await _dio.patch('api/v1/booking/assign-staff', data: {
+        'booking_id': bookingId,
+        'staffIds': staffIds,
+      });
+
+      if (response.statusCode == 200) {
+        return const Right(unit);
+      } else {
+        return const Left(MainFailure.serverFailure());
+      }
+    } catch (e) {
+      log('❌ Assign Staff Error: $e');
+      return const Left(MainFailure.serverFailure());
+    }
+  }
+
+  @override
+  Future<Either<MainFailure, List<BookingModel>>> getStaffTasks() async {
+    try {
+      final response = await _dio.get('api/v1/booking/staff-tasks');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data is List ? response.data : (response.data['data'] as List? ?? []);
+        final tasks = data.map((json) => BookingModel.fromJson(json as Map<String, dynamic>)).toList();
+        return Right(tasks);
+      } else {
+        return const Left(MainFailure.serverFailure());
+      }
+    } catch (e) {
+      log('❌ Get Staff Tasks Error: $e');
+      return const Left(MainFailure.serverFailure());
+    }
+  }
+
+  @override
+  Future<Either<MainFailure, Unit>> updateStatus(String bookingId, String newStatus) async {
+    try {
+      final response = await _dio.patch('api/v1/booking/update-status', data: {
+        'booking_id': bookingId,
+        'new_status': newStatus,
+      });
+
+      if (response.statusCode == 200) {
+        return const Right(unit);
       } else {
         return const Left(MainFailure.serverFailure());
       }

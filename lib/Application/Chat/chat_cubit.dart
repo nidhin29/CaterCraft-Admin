@@ -5,15 +5,18 @@ import 'package:catering/Application/Chat/chat_state.dart';
 import 'package:catering/Domain/Chat/chat_service.dart';
 import 'package:catering/Domain/Chat/message_model.dart';
 import 'package:catering/Infrastructure/Core/socket_service.dart';
+import 'package:catering/Domain/Security/security_service.dart';
 import 'package:injectable/injectable.dart';
+
 
 @injectable
 class ChatCubit extends Cubit<ChatState> {
   final ChatService _chatService;
   final SocketService _socketService;
+  final SecurityService _securityService;
   String? _currentRoomId;
 
-  ChatCubit(this._chatService, this._socketService) : super(ChatState.initial()) {
+  ChatCubit(this._chatService, this._socketService, this._securityService) : super(ChatState.initial()) {
     _socketService.listenForMessages(_onMessageReceived);
     _socketService.listenForTypingStatus(_onTypingStatusReceived);
     _socketService.listenForMessageDeletion(_onMessageDeleted);
@@ -30,11 +33,33 @@ class ChatCubit extends Cubit<ChatState> {
     _socketService.sendTypingStatus(roomId, userId, isTyping);
   }
 
-  void _onMessageReceived(dynamic data) {
+  void _onMessageReceived(dynamic data) async {
     if (!isClosed) {
       try {
-        final newMessage = MessageModel.fromJson(data as Map<String, dynamic>);
+        var newMessage = MessageModel.fromJson(data as Map<String, dynamic>);
         
+        // DECRYPT IF NEEDED
+        if (newMessage.isEncrypted && newMessage.encryptionNonce != null) {
+          final otherPubKey = state.recipientPublicKey;
+          if (otherPubKey != null) {
+            try {
+              final decryptedText = await _securityService.decryptText(
+                ciphertextBase64: newMessage.message,
+                nonceBase64: newMessage.encryptionNonce!,
+                senderPublicKey: otherPubKey,
+              );
+              newMessage = newMessage.copyWith(message: decryptedText);
+              log('🔓 E2EE: Decryption successful for message ${newMessage.id}');
+            } catch (e) {
+              log('❌ E2EE Decryption Error: $e');
+              newMessage = newMessage.copyWith(message: "[🔒 Encrypted Message]");
+            }
+          } else {
+            log('⚠️ E2EE: Received encrypted message but recipientPublicKey is null in state.');
+            newMessage = newMessage.copyWith(message: "[🔒 Encrypted Message]");
+          }
+        }
+
         // Prevent double messages
         final isDuplicate = state.messages.any((m) => 
           (m.id != null && m.id == newMessage.id) || 
@@ -77,13 +102,34 @@ class ChatCubit extends Cubit<ChatState> {
     required String room,
     required File imageFile,
   }) async {
-    // 1. Upload to S3
-    final uploadResult = await _chatService.uploadMedia(imageFile);
+    // 1. Prepare E2EE if available
+    final recipientPubKey = state.recipientPublicKey;
+    String? nonce;
+    File fileToUpload = imageFile;
+
+    if (recipientPubKey != null) {
+      final bytes = await imageFile.readAsBytes();
+      final encryptionResult = await _securityService.encryptBytes(
+        bytes: bytes,
+        recipientPublicKey: recipientPubKey,
+      );
+      
+      // Save encrypted bytes to temp file for upload
+      final tempDir = Directory.systemTemp;
+      final tempFile = File('${tempDir.path}/enc_${DateTime.now().millisecondsSinceEpoch}.bin');
+      await tempFile.writeAsBytes(encryptionResult['ciphertext']);
+      
+      fileToUpload = tempFile;
+      nonce = encryptionResult['nonce'];
+    }
+
+    // 2. Upload to S3 (Encrypted or Plain)
+    final uploadResult = await _chatService.uploadMedia(fileToUpload);
     
     uploadResult.fold(
       (failure) => emit(state.copyWith(error: "Failed to upload image")),
       (imageUrl) {
-        // 2. Send via socket
+        // 3. Send via socket
         _socketService.sendPrivateMessage(
           senderId: senderId,
           senderType: senderType,
@@ -92,6 +138,8 @@ class ChatCubit extends Cubit<ChatState> {
           message: "[Image]",
           room: room,
           imageUrl: imageUrl,
+          isEncrypted: recipientPubKey != null,
+          encryptionNonce: nonce,
         );
       },
     );
@@ -125,9 +173,37 @@ class ChatCubit extends Cubit<ChatState> {
     
     failOrSuccess.fold(
       (l) => emit(state.copyWith(isLoading: false, error: 'Failed to fetch history')),
-      (history) {
+      (history) async {
+        // DECRYPT HISTORY
+        final otherPubKey = state.recipientPublicKey;
+        List<MessageModel> decryptedHistory = [];
+
+        if (otherPubKey != null) {
+          log('🔐 E2EE: Decrypting history with recipient public key.');
+          for (var msg in history) {
+            if (msg.isEncrypted && msg.encryptionNonce != null) {
+              try {
+                final decryptedText = await _securityService.decryptText(
+                  ciphertextBase64: msg.message,
+                  nonceBase64: msg.encryptionNonce!,
+                  senderPublicKey: otherPubKey,
+                );
+                decryptedHistory.add(msg.copyWith(message: decryptedText));
+              } catch (e) {
+                log('❌ E2EE History Decryption Error: $e');
+                decryptedHistory.add(msg.copyWith(message: "[🔒 Encrypted Message]"));
+              }
+            } else {
+              decryptedHistory.add(msg);
+            }
+          }
+        } else {
+          log('ℹ️ E2EE: No recipient public key in state, showing history as is.');
+          decryptedHistory = history;
+        }
+
         // REVERSE to Newest First
-        final reversedHistory = history.reversed.toList();
+        final reversedHistory = decryptedHistory.reversed.toList();
         emit(state.copyWith(
           isLoading: false, 
           messages: reversedHistory, 
@@ -148,12 +224,37 @@ class ChatCubit extends Cubit<ChatState> {
 
     failOrSuccess.fold(
       (l) => emit(state.copyWith(isLoadMoreLoading: false)),
-      (newHistory) {
+      (newHistory) async {
         if (newHistory.isEmpty) {
           emit(state.copyWith(isLoadMoreLoading: false, hasMore: false));
         } else {
+          // DECRYPT MORE HISTORY
+          final otherPubKey = state.recipientPublicKey;
+          List<MessageModel> decryptedNewHistory = [];
+
+          if (otherPubKey != null) {
+            for (var msg in newHistory) {
+              if (msg.isEncrypted && msg.encryptionNonce != null) {
+                try {
+                  final decryptedText = await _securityService.decryptText(
+                    ciphertextBase64: msg.message,
+                    nonceBase64: msg.encryptionNonce!,
+                    senderPublicKey: otherPubKey,
+                  );
+                  decryptedNewHistory.add(msg.copyWith(message: decryptedText));
+                } catch (e) {
+                  decryptedNewHistory.add(msg.copyWith(message: "[🔒 Encrypted Message]"));
+                }
+              } else {
+                decryptedNewHistory.add(msg);
+              }
+            }
+          } else {
+            decryptedNewHistory = newHistory;
+          }
+
           // APPEND TO END of reversed list (which means older messages)
-          final reversedNewHistory = newHistory.reversed.toList();
+          final reversedNewHistory = decryptedNewHistory.reversed.toList();
           final allMessages = [...state.messages, ...reversedNewHistory];
           
           emit(state.copyWith(
@@ -167,9 +268,19 @@ class ChatCubit extends Cubit<ChatState> {
     );
   }
 
-  void joinRoom(String roomId) {
+  void joinRoom(String roomId, String otherUserId) async {
     _currentRoomId = roomId;
     _socketService.joinChat(roomId);
+
+    // FETCH PUBLIC KEY FOR E2EE
+    final result = await _chatService.getRecipientPublicKey(otherUserId);
+    result.fold(
+      (l) => log('⚠️ E2EE: Could not fetch recipient public key. Encryption will be disabled for this chat.'),
+      (pubKey) {
+        log('✅ E2EE: Recipient public key fetched successfully.');
+        emit(state.copyWith(recipientPublicKey: pubKey));
+      },
+    );
   }
 
   void sendMessage({
@@ -179,14 +290,32 @@ class ChatCubit extends Cubit<ChatState> {
     required String receiverType,
     required String message,
     required String room,
-  }) {
+  }) async {
+    final recipientPubKey = state.recipientPublicKey;
+    String finalMessage = message;
+    String? nonce;
+
+    if (recipientPubKey != null) {
+      log('🔐 E2EE: Encrypting message...');
+      final encryptionResult = await _securityService.encryptText(
+        plainText: message,
+        recipientPublicKey: recipientPubKey,
+      );
+      finalMessage = encryptionResult['ciphertext']!;
+      nonce = encryptionResult['nonce'];
+    } else {
+      log('ℹ️ E2EE: No recipient key, sending as plain text.');
+    }
+
     _socketService.sendPrivateMessage(
       senderId: senderId,
       senderType: senderType,
       receiverId: receiverId,
       receiverType: receiverType,
-      message: message,
+      message: finalMessage,
       room: room,
+      isEncrypted: recipientPubKey != null,
+      encryptionNonce: nonce,
     );
 
     final tempMsg = MessageModel(
@@ -194,9 +323,11 @@ class ChatCubit extends Cubit<ChatState> {
       senderType: senderType,
       receiverId: receiverId,
       receiverType: receiverType,
-      message: message,
+      message: message, // Keep local message plain for immediate display
       room: room,
       createdAt: DateTime.now().toIso8601String(),
+      isEncrypted: recipientPubKey != null,
+      encryptionNonce: nonce,
     );
 
     // INSERT AT START for reversed list

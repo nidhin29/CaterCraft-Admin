@@ -13,6 +13,7 @@ abstract class ChatState with _$ChatState {
     @Default(true) bool hasMore,
     @Default(false) bool isLoadMoreLoading,
     @Default(false) bool isOtherUserTyping,
+    String? recipientPublicKey,
   }) = _ChatState;
 
   factory ChatState.initial() => const ChatState(

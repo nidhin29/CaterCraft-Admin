@@ -20,6 +20,7 @@ import 'package:catering/Domain/bookings/booking_service.dart' as _i346;
 import 'package:catering/Domain/Chat/chat_service.dart' as _i872;
 import 'package:catering/Domain/LoggedIn/logged_in_service.dart' as _i712;
 import 'package:catering/Domain/Owner/owner_service.dart' as _i430;
+import 'package:catering/Domain/Security/security_service.dart' as _i165;
 import 'package:catering/Domain/Service/service_management_service.dart'
     as _i951;
 import 'package:catering/Domain/SignIn/sign_in_service.dart' as _i675;
@@ -53,6 +54,7 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
+    gh.lazySingleton<_i165.SecurityService>(() => _i165.SecurityService());
     gh.lazySingleton<_i717.SocketService>(() => _i717.SocketService());
     gh.lazySingleton<_i712.LoggedInService>(() => _i852.LoggedInRepo());
     gh.lazySingleton<_i872.ChatService>(() => _i686.ChatRepo(gh<_i361.Dio>()));
@@ -71,14 +73,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i712.LoggedInService>(),
       ),
     );
+    gh.factory<_i344.ChatCubit>(
+      () => _i344.ChatCubit(
+        gh<_i872.ChatService>(),
+        gh<_i717.SocketService>(),
+        gh<_i165.SecurityService>(),
+      ),
+    );
     gh.factory<_i767.BookingCubit>(
       () => _i767.BookingCubit(gh<_i346.BookingService>()),
     );
     gh.factory<_i324.StaffCubit>(
       () => _i324.StaffCubit(gh<_i346.BookingService>()),
-    );
-    gh.factory<_i344.ChatCubit>(
-      () => _i344.ChatCubit(gh<_i872.ChatService>(), gh<_i717.SocketService>()),
     );
     gh.lazySingleton<_i951.ServiceManagementService>(
       () => _i501.ServiceManagementRepo(
@@ -102,6 +108,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i430.OwnerService>(),
         gh<_i717.SocketService>(),
         gh<_i872.ChatService>(),
+        gh<_i165.SecurityService>(),
       ),
     );
     return this;
