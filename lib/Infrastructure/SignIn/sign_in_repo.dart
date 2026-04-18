@@ -5,14 +5,16 @@ import 'package:catering/Domain/SignIn/sign_in_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:catering/Domain/Failure/failure.dart';
+import 'package:catering/Domain/TokenManager/token_service.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:injectable/injectable.dart';
 
 @LazySingleton(as: SignInService)
 class SignInRepo implements SignInService {
   final Dio _dio;
+  final TokenService _tokenService;
 
-  SignInRepo(this._dio);
+  SignInRepo(this._dio, this._tokenService);
 
   @override
   Future<Either<MainFailure, AuthResponse>> login({
@@ -32,6 +34,15 @@ class SignInRepo implements SignInService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
+        
+        // Save Tokens
+        if (authResponse.accessToken != null || authResponse.token != null) {
+          await _tokenService.saveToken(authResponse.accessToken ?? authResponse.token!);
+        }
+        if (authResponse.refreshToken != null) {
+          await _tokenService.saveRefreshToken(authResponse.refreshToken!);
+        }
+
         return Right(authResponse);
       } else {
         return const Left(MainFailure.serverFailure());
@@ -102,7 +113,15 @@ class SignInRepo implements SignInService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
+        final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
+         // Save Tokens
+        if (authResponse.accessToken != null || authResponse.token != null) {
+          await _tokenService.saveToken(authResponse.accessToken ?? authResponse.token!);
+        }
+        if (authResponse.refreshToken != null) {
+          await _tokenService.saveRefreshToken(authResponse.refreshToken!);
+        }
+        return Right(authResponse);
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
@@ -119,7 +138,15 @@ class SignInRepo implements SignInService {
         data: {'tokenID': tokenID},
       );
       if (response.statusCode == 200) {
-        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
+        final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
+         // Save Tokens
+        if (authResponse.accessToken != null || authResponse.token != null) {
+          await _tokenService.saveToken(authResponse.accessToken ?? authResponse.token!);
+        }
+        if (authResponse.refreshToken != null) {
+          await _tokenService.saveRefreshToken(authResponse.refreshToken!);
+        }
+        return Right(authResponse);
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
@@ -162,7 +189,15 @@ class SignInRepo implements SignInService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
+        final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
+         // Save Tokens
+        if (authResponse.accessToken != null || authResponse.token != null) {
+          await _tokenService.saveToken(authResponse.accessToken ?? authResponse.token!);
+        }
+        if (authResponse.refreshToken != null) {
+          await _tokenService.saveRefreshToken(authResponse.refreshToken!);
+        }
+        return Right(authResponse);
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {
@@ -197,7 +232,15 @@ class SignInRepo implements SignInService {
         data: {'email': email, 'otp': otp},
       );
       if (response.statusCode == 200) {
-        return Right(AuthResponse.fromJson(response.data['data'] ?? response.data));
+        final authResponse = AuthResponse.fromJson(response.data['data'] ?? response.data);
+         // Save Tokens
+        if (authResponse.accessToken != null || authResponse.token != null) {
+          await _tokenService.saveToken(authResponse.accessToken ?? authResponse.token!);
+        }
+        if (authResponse.refreshToken != null) {
+          await _tokenService.saveRefreshToken(authResponse.refreshToken!);
+        }
+        return Right(authResponse);
       }
       return const Left(MainFailure.serverFailure());
     } catch (e) {

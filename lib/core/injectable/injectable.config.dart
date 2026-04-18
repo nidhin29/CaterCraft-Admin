@@ -56,22 +56,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i165.SecurityService>(() => _i165.SecurityService());
     gh.lazySingleton<_i717.SocketService>(() => _i717.SocketService());
-    gh.lazySingleton<_i712.LoggedInService>(() => _i852.LoggedInRepo());
     gh.lazySingleton<_i872.ChatService>(() => _i686.ChatRepo(gh<_i361.Dio>()));
     gh.lazySingleton<_i346.BookingService>(
       () => _i284.BookingRepo(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i675.SignInService>(
-      () => _i545.SignInRepo(gh<_i361.Dio>()),
-    );
     gh.lazySingleton<_i870.TokenService>(
       () => _i623.TokenRepo(gh<_i460.SharedPreferences>()),
-    );
-    gh.factory<_i75.LoggedinCubit>(
-      () => _i75.LoggedinCubit(
-        gh<_i870.TokenService>(),
-        gh<_i712.LoggedInService>(),
-      ),
     );
     gh.factory<_i344.ChatCubit>(
       () => _i344.ChatCubit(
@@ -83,8 +73,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i767.BookingCubit>(
       () => _i767.BookingCubit(gh<_i346.BookingService>()),
     );
-    gh.factory<_i324.StaffCubit>(
-      () => _i324.StaffCubit(gh<_i346.BookingService>()),
+    gh.lazySingleton<_i675.SignInService>(
+      () => _i545.SignInRepo(gh<_i361.Dio>(), gh<_i870.TokenService>()),
+    );
+    gh.lazySingleton<_i712.LoggedInService>(
+      () => _i852.LoggedInRepo(gh<_i361.Dio>(), gh<_i870.TokenService>()),
     );
     gh.lazySingleton<_i951.ServiceManagementService>(
       () => _i501.ServiceManagementRepo(
@@ -100,6 +93,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i430.OwnerService>(
       () => _i699.OwnerRepo(gh<_i361.Dio>(), gh<_i870.TokenService>()),
+    );
+    gh.factory<_i324.StaffCubit>(
+      () => _i324.StaffCubit(
+        gh<_i346.BookingService>(),
+        gh<_i430.OwnerService>(),
+      ),
+    );
+    gh.factory<_i75.LoggedinCubit>(
+      () => _i75.LoggedinCubit(
+        gh<_i870.TokenService>(),
+        gh<_i712.LoggedInService>(),
+      ),
     );
     gh.factory<_i980.OwnerCubit>(
       () => _i980.OwnerCubit(

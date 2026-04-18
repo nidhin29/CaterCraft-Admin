@@ -23,6 +23,42 @@ abstract class NetworkModule {
         }
         return handler.next(options);
       },
+      onError: (error, handler) async {
+        if (error.response?.statusCode == 401) {
+          final tokenService = getIt<TokenService>();
+          final refreshToken = await tokenService.getRefreshToken();
+          
+          if (refreshToken != null) {
+            try {
+              // Create a dedicated Dio instance for refresh to avoid circular dependency
+              final refreshDio = Dio(BaseOptions(baseUrl: baseUrl));
+              final response = await refreshDio.post(
+                'api/v1/auth/refresh-token',
+                data: {'refreshToken': refreshToken},
+              );
+
+              if (response.statusCode == 200) {
+                final newAccessToken = response.data['data']['accessToken'];
+                final newRefreshToken = response.data['data']['refreshToken'];
+                
+                await tokenService.saveToken(newAccessToken);
+                await tokenService.saveRefreshToken(newRefreshToken);
+
+                // Retry original request with new token
+                final options = error.requestOptions;
+                options.headers['Authorization'] = 'Bearer $newAccessToken';
+                
+                final retryResponse = await dio.fetch(options);
+                return handler.resolve(retryResponse);
+              }
+            } catch (e) {
+              // Refresh failed, clear session and proceed with error
+              await tokenService.clearAll();
+            }
+          }
+        }
+        return handler.next(error);
+      },
     ));
 
     return dio;

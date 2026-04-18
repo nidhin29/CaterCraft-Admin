@@ -20,6 +20,10 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final _rateController = TextEditingController();
   final _durationController = TextEditingController();
   final _descController = TextEditingController();
+  final _startersController = TextEditingController();
+  final _mainController = TextEditingController();
+  final _dessertsController = TextEditingController();
+  final _inclusionsController = TextEditingController();
   File? _image;
   String _selectedGroup = 'wedding';
 
@@ -28,6 +32,11 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     if (pickedFile != null) {
       setState(() => _image = File(pickedFile.path));
     }
+  }
+
+  List<String> _parseList(String val) {
+    if (val.trim().isEmpty) return [];
+    return val.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
   }
 
   @override
@@ -73,6 +82,36 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                   const SizedBox(height: 20),
                   _buildLabel("Description"),
                   _textField(_descController, "Detailed service description...", Icons.description, maxLines: 4),
+                  
+                  const SizedBox(height: 30),
+                  const Divider(color: Colors.white10, thickness: 2),
+                  const SizedBox(height: 20),
+                  Text(
+                    "GASTRONOMY & INCLUSIONS",
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.ownerAccent,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  _buildLabel("Starters (comma separated)"),
+                  _textField(_startersController, "Tacos, Sliders, Bruschetta...", Icons.restaurant_menu),
+                  const SizedBox(height: 15),
+                  
+                  _buildLabel("Main Course (comma separated)"),
+                  _textField(_mainController, "Lamb Rack, Risotto, Pasta...", Icons.flatware),
+                  const SizedBox(height: 15),
+                  
+                  _buildLabel("Desserts (comma separated)"),
+                  _textField(_dessertsController, "Tiramisu, Gelato, Fruit Tart...", Icons.icecream),
+                  const SizedBox(height: 15),
+                  
+                  _buildLabel("What's Included (comma separated)"),
+                  _textField(_inclusionsController, "Cutlery, Staff, Cleanup...", Icons.info_outline),
+                  
                   const SizedBox(height: 50),
                   SizedBox(
                     width: double.infinity,
@@ -92,6 +131,10 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                                       description: _descController.text,
                                       image: _image!,
                                       serviceGroup: _selectedGroup,
+                                      starters: _parseList(_startersController.text),
+                                      mainCourse: _parseList(_mainController.text),
+                                      desserts: _parseList(_dessertsController.text),
+                                      whatsIncluded: _parseList(_inclusionsController.text),
                                     );
                               }
                             },

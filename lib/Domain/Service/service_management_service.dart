@@ -11,6 +11,10 @@ abstract class ServiceManagementService {
     required String description,
     required File image,
     required String serviceGroup,
+    List<String>? starters,
+    List<String>? mainCourse,
+    List<String>? desserts,
+    List<String>? whatsIncluded,
   });
 
   Future<Either<MainFailure, List<ServiceModel>>> viewServices();

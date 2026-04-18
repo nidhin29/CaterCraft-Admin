@@ -242,14 +242,29 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Header
+                      // Header (Logo)
+                      Container(
+                        width: 100,
+                        height: 100,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white.withOpacity(0.1)),
+                        ),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       Text(
                         "CATERCRAFT",
                         style: GoogleFonts.outfit(
                           color: Colors.white,
-                          fontSize: 32,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
+                          letterSpacing: 4,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -257,11 +272,10 @@ class _LoginPageState extends State<LoginPage> {
                         "PREMIUM CATERING SOLUTIONS",
                         style: GoogleFonts.outfit(
                           color: Colors.white54,
-                          fontSize: 10,
+                          fontSize: 8,
                           letterSpacing: 2,
                         ),
                       ),
-                      const SizedBox(height: 60),
 
                       // Glassmorph Card
                       AnimatedContainer(

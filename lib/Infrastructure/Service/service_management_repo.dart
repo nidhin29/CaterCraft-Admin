@@ -25,10 +25,15 @@ class ServiceManagementRepo implements ServiceManagementService {
     required String description,
     required File image,
     required String serviceGroup,
+    List<String>? starters,
+    List<String>? mainCourse,
+    List<String>? desserts,
+    List<String>? whatsIncluded,
   }) async {
     try {
       final String fileName = image.path.split('/').last;
-      final formData = FormData.fromMap({
+      
+      final Map<String, dynamic> dataMap = {
         'name': name,
         'rate': rate,
         'duration': duration,
@@ -39,7 +44,14 @@ class ServiceManagementRepo implements ServiceManagementService {
           filename: fileName,
           contentType: MediaType('image', 'jpeg'), 
         ),
-      });
+      };
+
+      if (starters != null) dataMap['menu_starters'] = starters;
+      if (mainCourse != null) dataMap['menu_main'] = mainCourse;
+      if (desserts != null) dataMap['menu_desserts'] = desserts;
+      if (whatsIncluded != null) dataMap['whats_included'] = whatsIncluded;
+
+      final formData = FormData.fromMap(dataMap);
 
       final role = await _tokenService.getRole() ?? 1;
       final String base = role == 1 ? 'owner' : 'staff';

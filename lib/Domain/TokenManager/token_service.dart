@@ -1,6 +1,8 @@
 abstract class TokenService {
   Future<void> saveToken(String token);
   Future<String?> getToken();
+  Future<void> saveRefreshToken(String token);
+  Future<String?> getRefreshToken();
   Future<void> deleteToken();
   Future<void> saveRole(int role);
   Future<int?> getRole();

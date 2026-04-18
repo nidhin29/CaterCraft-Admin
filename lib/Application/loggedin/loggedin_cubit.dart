@@ -20,11 +20,26 @@ class LoggedinCubit extends Cubit<LoggedinState> {
     final onboarded = await loggedInService.isOnboarded();
     
     if (token != null) {
-      final role = await tokenService.getRole();
-      emit(state.copyWith(value: true, role: role, isOnboarded: onboarded));
-    } else {
-      emit(state.copyWith(value: false, role: null, isOnboarded: onboarded));
+      // Perform server-side validation
+      final isValid = await loggedInService.validateSession();
+      
+      if (isValid) {
+        final role = await tokenService.getRole();
+        emit(state.copyWith(value: true, role: role, isOnboarded: onboarded));
+        return;
+      } 
+      
+      // If invalid, try to refresh
+      final isRefreshed = await loggedInService.refreshTokens();
+      if (isRefreshed) {
+        final role = await tokenService.getRole();
+        emit(state.copyWith(value: true, role: role, isOnboarded: onboarded));
+        return;
+      }
     }
+    
+    // Default fallback to unauthenticated
+    emit(state.copyWith(value: false, role: null, isOnboarded: onboarded));
   }
 
   Future<void> clearSession() async {

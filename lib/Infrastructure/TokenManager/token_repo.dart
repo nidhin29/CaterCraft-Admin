@@ -18,6 +18,7 @@ class TokenRepo implements TokenService {
   }
 
   static const String _tokenKey = 'auth_token';
+  static const String _refreshTokenKey = 'refresh_token';
   static const String _roleKey = 'user_role';
   static const String _emailKey = 'user_email';
   static const String _companyKey = 'user_company';
@@ -37,8 +38,19 @@ class TokenRepo implements TokenService {
   }
 
   @override
+  Future<void> saveRefreshToken(String token) async {
+    await _secureStorage.write(key: _refreshTokenKey, value: token);
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    return await _secureStorage.read(key: _refreshTokenKey);
+  }
+
+  @override
   Future<void> deleteToken() async {
     await _secureStorage.delete(key: _tokenKey);
+    await _secureStorage.delete(key: _refreshTokenKey);
   }
 
   @override
@@ -132,6 +144,7 @@ class TokenRepo implements TokenService {
   Future<void> clearAll() async {
     _cachedRole = null; // Clear cache
     await _secureStorage.delete(key: _tokenKey);
+    await _secureStorage.delete(key: _refreshTokenKey);
     await _prefs.remove(_roleKey);
     await _prefs.remove(_emailKey);
     await _prefs.remove(_companyKey);

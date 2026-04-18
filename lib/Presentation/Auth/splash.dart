@@ -80,16 +80,24 @@ class SplashScreenState extends State<SplashScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    width: 150,
+                    height: 150,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.05),
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
-                    child: const Icon(
-                      Icons.restaurant_menu_rounded,
-                      size: 80,
-                      color: Colors.white,
+                    padding: const EdgeInsets.all(24),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(height: 32),

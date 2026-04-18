@@ -38,9 +38,9 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
       // Fetch shared context data
       staffCubit.fetchAssignedBookings();
       
-      // Sync device ID (FCM token) and fetch details sequentially
-      await ownerCubit.syncFCMToken();
-      await ownerCubit.fetchDetails();
+      // Sync device ID (FCM token) and fetch details sequentially via StaffCubit
+      await staffCubit.syncFCMToken();
+      await staffCubit.fetchDetails();
       
       final user = ownerCubit.state.ownerDetails.fold(() => null, (u) => u);
       ownerCubit.setupSocket(email, user?.id);

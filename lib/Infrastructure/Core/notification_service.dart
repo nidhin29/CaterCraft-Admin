@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,10 @@ class NotificationService {
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+
+  // Stream for foreground notification events
+  final _onNotificationReceivedController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get onNotificationReceived => _onNotificationReceivedController.stream;
 
   // Android Notification Channel
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -59,6 +64,9 @@ class NotificationService {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Foreground Message received');
       _showLocalNotification(message);
+      
+      // Broadcast to any listening Cubits for UI refresh
+      _onNotificationReceivedController.add(message.data);
     });
 
     // 4. Listen for Background/Terminated Click interactions

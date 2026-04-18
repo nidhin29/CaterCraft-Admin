@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:catering/Domain/Chat/message_model.dart';
@@ -42,6 +43,7 @@ class OwnerCubit extends Cubit<OwnerState> {
     _loadMocks();
     _setupGlobalMessageListener();
     _setupGlobalTypingListener();
+    _setupNotificationListener();
   }
 
   bool _isSocketSetup = false;
@@ -113,6 +115,22 @@ class OwnerCubit extends Cubit<OwnerState> {
       }
     };
     _socketService.listenForMessages(_messageListener!);
+  }
+
+  StreamSubscription? _notificationSubscription;
+
+  void _setupNotificationListener() {
+    _notificationSubscription = NotificationService().onNotificationReceived.listen((data) {
+      if (isClosed) return;
+      
+      final type = data['type'];
+      log("🔔 OwnerCubit received notification event: $type");
+      
+      // Refresh logic based on trigger type
+      if (type == "booking" || type == "payment_received" || type == "new_booking") {
+        fetchBookings();
+      }
+    });
   }
 
   void _loadMocks() {
@@ -191,6 +209,10 @@ class OwnerCubit extends Cubit<OwnerState> {
     required String description,
     required File image,
     required String serviceGroup,
+    List<String>? starters,
+    List<String>? mainCourse,
+    List<String>? desserts,
+    List<String>? whatsIncluded,
   }) async {
     emit(state.copyWith(isSubmitting: true, serviceFailureOrSuccess: none()));
     final result = await _serviceService.addService(
@@ -200,6 +222,10 @@ class OwnerCubit extends Cubit<OwnerState> {
       description: description,
       image: image,
       serviceGroup: serviceGroup,
+      starters: starters,
+      mainCourse: mainCourse,
+      desserts: desserts,
+      whatsIncluded: whatsIncluded,
     );
     emit(state.copyWith(
       isSubmitting: false,
@@ -261,6 +287,7 @@ class OwnerCubit extends Cubit<OwnerState> {
           ownerDetails: some(user),
         ));
         _syncE2EEKeys();
+        syncFCMToken(); // Auto-sync notification token on every profile refresh
       },
     );
   }
@@ -408,6 +435,7 @@ class OwnerCubit extends Cubit<OwnerState> {
     if (_typingListener != null) {
       _socketService.stopListeningForTyping(_typingListener!);
     }
+    _notificationSubscription?.cancel();
     _socketService.disconnect();
     return super.close();
   }
